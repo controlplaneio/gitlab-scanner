@@ -1,0 +1,64 @@
+name: Deploy PoC to GitHub Pages
+
+# Builds the PoC into a single self-contained dist/index.html (the version corpus,
+# the CVE catalogue, and every asset inlined) and publishes that one file to GitHub
+# Pages. The page makes no third-party request at runtime.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'poc/**'
+      - 'scripts/build-page.mjs'
+      - 'scripts/validate-master-catalog.mjs'
+      - 'tests/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+# Least-privilege token for Pages deployment.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One live deployment at a time; let an in-progress run finish rather than
+# cancelling it (cancelling a deploy mid-flight can leave Pages in a bad state).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Test the CVE applicability logic
+        run: node --test tests/*.test.mjs
+
+      - name: Validate the CVE catalogue
+        run: node scripts/validate-master-catalog.mjs poc/cves/gitlab-10.0.0-and-later.json --require-xdb-complete
+
+      - name: Build the self-contained page
+        run: node scripts/build-page.mjs
+
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Upload built single file
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
