@@ -1,0 +1,169 @@
+{
+  "description": "Corrections to NVD CPE applicability, applied by scripts/apply-catalogue-fixes.mjs after every catalogue refresh. Each range correction quotes the GitLab advisory text, or GitLab's own CVE record where the advisory gives no fix versions. The NVD original is kept on the record as errata.nvdApplicability, and the page shows the correction in the row tooltip.",
+  "eeOnlyRule": {
+    "description": "When GitLab's advisory text scopes a CVE to GitLab EE only (it says 'GitLab EE' or 'GitLab Enterprise Edition' and never CE, CE/EE or Community), CE CPE entries are dropped and wildcard-edition entries become EE.",
+    "summaryMatches": "\\bGitLab (?:EE|Enterprise Edition)\\b",
+    "summaryExcludes": "CE/EE|CE and EE|EE/CE|\\bCommunity\\b|\\bGitLab CE\\b"
+  },
+  "ranges": {
+    "CVE-2023-3399": {
+      "reason": "NVD ranges stop at 12.10.7 / 13.0.0 and include CE; the advisory covers EE from 11.6 to 16.5.1.",
+      "source": "Advisory: 'GitLab EE affecting all versions starting from 11.6 before 16.3.6, all versions starting from 16.4 before 16.4.2, all versions starting from 16.5 before 16.5.1'",
+      "edition": "enterprise",
+      "ranges": [
+        [
+          "11.6.0",
+          "16.3.6"
+        ],
+        [
+          "16.4.0",
+          "16.4.2"
+        ],
+        [
+          "16.5.0",
+          "16.5.1"
+        ]
+      ]
+    },
+    "CVE-2023-1204": {
+      "reason": "NVD ranges stop at 13.0.1; the advisory runs to 16.0.2.",
+      "source": "Advisory: 'GitLab CE/EE affecting all versions starting from 10.1 before 15.10.8, all versions starting from 15.11 before 15.11.7, all versions starting from 16.0 before 16.0.2'",
+      "edition": "*",
+      "ranges": [
+        [
+          "10.1.0",
+          "15.10.8"
+        ],
+        [
+          "15.11.0",
+          "15.11.7"
+        ],
+        [
+          "16.0.0",
+          "16.0.2"
+        ]
+      ]
+    },
+    "CVE-2025-13611": {
+      "reason": "NVD fix versions (18.4.5, 18.5.3) disagree with the advisory (18.5.5, 18.6.3).",
+      "source": "Advisory: 'GitLab CE/EE affecting all versions from 13.2 before 18.5.5 and 18.6 before 18.6.3'",
+      "edition": "*",
+      "ranges": [
+        [
+          "13.2.0",
+          "18.5.5"
+        ],
+        [
+          "18.6.0",
+          "18.6.3"
+        ]
+      ]
+    },
+    "CVE-2024-7047": {
+      "reason": "NVD lists exact version 7.2.0 where the advisory says 17.2 before 17.2.1.",
+      "source": "Advisory: 'GitLab CE/EE affecting all versions from 16.6 prior to 17.0.5, 17.1 prior to 17.1.3, 17.2 prior to 17.2.1'",
+      "edition": "*",
+      "ranges": [
+        [
+          "16.6.0",
+          "17.0.5"
+        ],
+        [
+          "17.1.0",
+          "17.1.3"
+        ],
+        [
+          "17.2.0",
+          "17.2.1"
+        ]
+      ]
+    },
+    "CVE-2022-3060": {
+      "reason": "NVD inverts the range (versionEndIncluding 12.7.0); the advisory says 'from 12.7', and GitLab's CVE record gives the fix versions.",
+      "source": "GitLab CVE record gitlab.com/gitlab-org/cves 2022/CVE-2022-3060.json: '>=12.7, <15.2.5', '>=15.3, <15.3.4', '>=15.4, <15.4.1'. The advisory text says only 'all versions from 12.7'.",
+      "edition": "*",
+      "ranges": [
+        [
+          "12.7.0",
+          "15.2.5"
+        ],
+        [
+          "15.3.0",
+          "15.3.4"
+        ],
+        [
+          "15.4.0",
+          "15.4.1"
+        ]
+      ]
+    },
+    "CVE-2024-4201": {
+      "reason": "The fix version 16.111.4 is a typo for 16.11.4, carried from the advisory text into NVD.",
+      "source": "Advisory: 'all versions starting from 5.1 before 16.10.7, all versions starting from 16.11 before 16.111.4, all versions starting from 17.0 before 17.0.2'",
+      "edition": "*",
+      "ranges": [
+        [
+          "5.1.0",
+          "16.10.7"
+        ],
+        [
+          "16.11.0",
+          "16.11.4"
+        ],
+        [
+          "17.0.0",
+          "17.0.2"
+        ]
+      ]
+    },
+    "CVE-2025-10903": {
+      "reason": "NVD start version 11.1 should be 11.10.",
+      "source": "Advisory: 'GitLab EE affecting all versions from 11.10 before 19.1.7, 19.2 before 19.2.5, and 19.3 before 19.3.1'",
+      "edition": "enterprise",
+      "ranges": [
+        [
+          "11.10.0",
+          "19.1.7"
+        ],
+        [
+          "19.2.0",
+          "19.2.5"
+        ],
+        [
+          "19.3.0",
+          "19.3.1"
+        ]
+      ]
+    },
+    "CVE-2022-2326": {
+      "reason": "NVD lists the 15.2 entry for EE twice and never for CE.",
+      "source": "Advisory: 'GitLab CE/EE affecting all versions before 15.0.5, all versions starting from 15.1 before 15.1.4, all versions starting from 15.2 before 15.2.1'",
+      "edition": "*",
+      "ranges": [
+        [
+          null,
+          "15.0.5"
+        ],
+        [
+          "15.1.0",
+          "15.1.4"
+        ],
+        [
+          "15.2.0",
+          "15.2.1"
+        ]
+      ]
+    },
+    "CVE-2020-13320": {
+      "reason": "NVD gives no lower bound; GitLab's own CVE record and OSV give 12.8 as the first affected version.",
+      "source": "GitLab CVE record (gitlab.com/gitlab-org/cves) and OSV: '>=12.8, <12.10.13'. The advisory text says only 'before version 12.10.13'.",
+      "edition": "*",
+      "ranges": [
+        [
+          "12.8.0",
+          "12.10.13"
+        ]
+      ]
+    }
+  }
+}

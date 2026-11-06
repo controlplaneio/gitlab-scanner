@@ -1,0 +1,1661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitLab drive-by CORS exposure scanner</title>
+  <meta name="description" content="Open a page, fingerprint an internal GitLab through the visitor's browser, and see which CVEs that version carries, with no login. Runs entirely client-side and never phones home.">
+
+  <link rel="canonical" href="https://controlplaneio.github.io/gitlab-scanner/">
+
+  <!-- Icons: favicon inlined so the page itself loads nothing at runtime; the
+       apple-touch icon and social card are fetched out of band by crawlers and iOS. -->
+  <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAIl0lEQVRIx4VWaXRURRb+6r3XSdPpTichCwlxZHNYAhFJUBEYEYQkQwCBoLgSIyGuqLig46AC4xFkUeHEDc+AigsigxiWAQSJbMqAAVkCGEjITpZO6M7S3a/q3vnRJHQ8Z5zvvD/vnjr11Vf3u3WvYCJTKovFAPDOmh1rv/yhsckDCAYDAmB0QXBEAOj8FQAzR0U6cmaOeTZvIgBTSouuC79pWgyjsqYx84Gl4Q7b07Mzbr6pr93eDczXdhAQEIpYEwBADF0LYmYAEEK0tHmP/FKy4oNtLW3eHZ+/lNAjypQSzFxV0+i8IfvNVZv5f0P94e/vsHD5xvB+s6prXcwMZr7pzvmvvrWBmX0+02+aKgimVF6/YlbMqrxB3bJQDX9dldZfjfj8ypTBy5Xfb/r9JjO/sPCzYXfOZ2Y9oe/on4799vVHz0qpdF3TNQ0QzIJYCAhDF4YuWrxi8Xdi6lLhlqK+RSz7RkhdDO8lbKFC0wSRIBaAEELouiaEIKK0O4a+/eFWW7cQvcrT49FZ41Nv7KsUCU0jhq5D06Br0DRcrMdb2zHpHRQeRU4Gdr2AZ9NQ5UH+JizZizYf+sSiu+PqYiGgCBCCiHRdY2DN+j2ITco9c76CmU1TMhMzSUmnKmn5djVsgcQ0iSw5Y7U8XSGZJZNkkszyWKnMXCExVWKaTHlVLtuujpeT10+BHUxTMvPpcxUxg3IMTRPRUeEADEMUnsM/CnC8DA1VDKuWMgjvPoHs0Qi3dHUmMKwXCubh8hys24/1h/HCJ4CPnPEi+TosmooxAwSA6CiHpglDCAhx1fP7z+P7vcgcz1n3av2czeQuj4uyni4yTTakKaMiwjqdKRUTsz0UM/uLtJ7Kje6lnshN/6GC3eJwMsYMuGpcQBhg7jyZBkY4vn5S62Z4eqW+1LdPYklZXb/rYy9V1icmdC/87idYDDCDCRYDNis0DQwo2bdPTMlPS6anhjsOk9YpEwzACC5TvwSI20yUlTZfOlGeNjaluqYxMT6iqtY1avifXU2eG/ok6LqQpiyrbCgquoDmFlgMEF04WXnmfFP0deFgNlVw2cMAhEBQSHCIASXNEekpISHG7bcNMnTtrvSU30prE2Kdl2trBOCX6BkfkzbmRqvV0nylLcwWuufAKaVkiHEtSZ3oosBiAAKahpZW76QJKS/PvSsQn/Tg0upaV2b6iPD4G4TFZjEbzxw9tOazXe8ve2zGpJsB2FaFtrZ6hQAIoUaX90oLJggLBQg+BV0T7pZ2AHUN7tik3LiYiGO7l06+9642Z1JEQu8Ge+qfMuauzX/+7pylH3/+A4Ar7jZdFz4TINitXRR0IehuByTc7YGqEQCm5yxPHzv045V5plQ3xZr9o2WdS47uIxOtvjXnkzZ+8spTL3/EjDCbVYCb2wGFGHuXV7DLFV0XCShUNiEMFOG0F50qKy6p2r9lIQCLoQN6fBTCbSiulnuL9YJN5oB5w9L/0v+Nd7+NcIYJUHkjIJDYvUuSuyjoHQOE4GQFdA2hIca6r/ZlZd4KIdyettLyuorqxiHRTelDfN1sRsFJY8HTWpsXSbeM3X+wyN3iDbVov1YAVvSODt6SrylgxvXRiIpB4TnckkJSypKy2numjABw/xP5VTUuYpamf/jIUSUqOaH40yk5E2oiR+0/EC/93gaXR7HYdxaJPRDnBBG0jpNrnT0p4N/xg8XWIvg0Z2VVnau51emwAQi3hwa+yAhHVEiLPJ5fU1p8qTk0cyAm3qhdbpbK7/Uox85fkZ4sAMhrpYCObHY4+KGRorWcz3oSVy6YoWnGuZJqAP16x/tNFWazEvHRE6W6NeLm1EHxsU4A1VU17T5avWjmqeZEfw0/MEKga2Vdy4GmAYyMZPTsh79/QyLEkTUxdf2mAwC2/PtoY1NLZY3r0J7jP249cnDbz4cK9h4pKgGw+p+7J44dDIv9lY1q4GDcPqDL/QAC8cl59Y1XmFkp5TeJmdb+SEhTy3cwsy/0+uwNWw5VVje+t27nrn0nsufmL1m9eXfhr2u/+oGZ9x06HdZnVqvbtXgLI10VFBEz+SUppZi5ruFK3OBcDUzXyloHEbJH49aR4vmP5IWmkJ2fPnHPfW+5mjyPzZpw7ESpq7ml+Hz1bxdrsu8Zc/HS5bSZSwb2janzhi/4Ehl3UuZQSAWjizGB+CG5nQqIyJTETKX1JGaRLddsI96waQ/Cp2XPzd/+/S/llQ0Xymr3HTz94qL1Rs/7EDkd9imp419ctaOt1s3MplJEFKxgNnoMzq2rb+4kIKLARe09Q5hOUY+bzX4uu1h6a+ZrsYPn9BvxdP+Rz8QNyRs6bn7x2Qtr1m2FPROOKSMznm9tbQu0xU6C2rrm2KTZiE2afezEBWaWUlIHAhzbjxNmEB40D15kZq6ubdxVeHJn4cmqmgZm3nCUp73Hj/9tPRyTYZ86YNRzriZPYB8pJTMfO3ExeuAjGJe1+OU3vmBmn89PQfCZxEw/l1D4o4RJct4XsnPsIeaH10hMMIcukIo5d977sE2Gc+qw8S8ppZjJ6/Mz82vLNt42aQH2HjgVPXB2e7uvU+DvOBo9NHElIYN6zFVbi+Tmo9KRpzCZXtlEzIqZmHnqw8uBcb2GP+n1+okCrZ/jhszZvP0ImPnu3LfvmL4ocDqfzy+DZilfx9T12UHlmKOQqZCpej2nDp5XzIEFkpn9fvPDT3efLaliZlNKZs56ZOW4GYuvTnZM1H/kM3+9/80/nAdZEr/6Lb+5jf8vHnoqv0dyXktrOzMLKaWu60rR5FnLTp2tmJc3Mf2O5KhIx+86n1SwWuCwggF3O0wFPcjvzKwUuT3thYfPrPhgW1yMc9v6+Q57NymVICJFZOg6gH9tO7L8/YJLlfWaEB0j89WJBhDMrBgC0DWIQFsMPDrM3EGTGN/9yZy0B7JGA5BSGbr2X6kqz3kX04v+AAAAAElFTkSuQmCC">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#2158e8">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Control Plane">
+  <meta property="og:title" content="GitLab drive-by CORS exposure scanner">
+  <meta property="og:description" content="Open a page, fingerprint an internal GitLab through the visitor's browser, and see which CVEs that version carries, with no login. Runs entirely client-side and never phones home.">
+  <meta property="og:url" content="https://controlplaneio.github.io/gitlab-scanner/">
+  <meta property="og:image" content="https://controlplaneio.github.io/gitlab-scanner/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="GitLab drive-by CORS exposure scanner, by Control Plane">
+
+  <!-- Twitter / X card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GitLab drive-by CORS exposure scanner">
+  <meta name="twitter:description" content="Open a page, fingerprint an internal GitLab through the visitor's browser, and see which CVEs that version carries, with no login. Runs entirely client-side and never phones home.">
+  <meta name="twitter:image" content="https://controlplaneio.github.io/gitlab-scanner/og-image.png">
+  <meta name="twitter:image:alt" content="GitLab drive-by CORS exposure scanner, by Control Plane">
+
+  <style>
+    /* ====================================================================
+       ControlPlane design tokens. Exact brand values are filled from the
+       live control-plane.io design system; everything else references these.
+       ==================================================================== */
+    :root {
+      color-scheme: light dark;
+
+      /* ControlPlane: navy ink on white, electric-blue accent, pastel tints */
+      --cp-ink:        #151623;
+      --cp-page:       #eef0f4;
+      --cp-bg:         #ffffff;
+      --cp-surface:    #ffffff;
+      --cp-surface-2:  #f5f7fb;
+      --cp-text:       #151623;
+      --cp-muted:      color-mix(in srgb, #151623 60%, white);
+      --cp-border:     color-mix(in srgb, #151623 13%, white);
+      --cp-blue:       #2158e8;
+      --cp-blue-600:   #1a46ba;
+      --cp-accent:     var(--cp-blue);
+      --cp-accent-ink: #ffffff;
+      --cp-link:       #2158e8;
+      --cp-link-hover: #1a46ba;
+
+      --cp-tint-blue:  #e5f2ff;
+      --cp-tint-teal:  #dff4f3;
+      --cp-tint-purple:#eee5ff;
+      --cp-tint-orange:#ffe9db;
+
+      --cp-danger:     #b42318;
+      --cp-warn:       #b54708;
+      --cp-ok:         #087443;
+
+      --cp-critical:   #b42318;
+      --cp-high:       #c4320a;
+      --cp-medium:     #b54708;
+      --cp-low:        #175cd3;
+      --cp-none:       #667085;
+
+      --cp-radius:     16px;
+      --cp-radius-lg:  8px;
+      --cp-radius-sm:  6px;
+      --cp-radius-pill:100px;
+      --cp-shadow:     0 0 60px color-mix(in srgb, #151623 8%, transparent);
+      --cp-shadow-sm:  4px 4px 10px color-mix(in srgb, #151623 7%, transparent);
+      --cp-maxw:       1120px;
+      --cp-font:       "aspekta", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --cp-mono:       "geistMono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --cp-ink:        #eef1f8;
+        --cp-page:       #121322;
+        --cp-bg:         #171a2b;
+        --cp-surface:    #1b1e30;
+        --cp-surface-2:  #22263c;
+        --cp-text:       #eef1f8;
+        --cp-muted:      color-mix(in srgb, #eef1f8 60%, #121322);
+        --cp-border:     color-mix(in srgb, #eef1f8 16%, transparent);
+        --cp-blue:       #5b82f0;
+        --cp-blue-600:   #7a9bf5;
+        --cp-accent:     #5b82f0;
+        --cp-link:       #8fa9f6;
+        --cp-link-hover: #aec0f9;
+        --cp-danger:     #ff6b74;
+        --cp-warn:       #f4b942;
+        --cp-ok:         #41d18a;
+        --cp-critical:   #e5484d;
+        --cp-high:       #f76808;
+        --cp-medium:     #ffba18;
+        --cp-low:        #6aa9ff;
+        --cp-tint-blue:  color-mix(in srgb, #2158e8 22%, transparent);
+        --cp-tint-teal:  color-mix(in srgb, #118595 22%, transparent);
+        --cp-shadow:     0 18px 50px -24px rgba(0,0,0,.7);
+      }
+    }
+    :root[data-theme="light"] { color-scheme: light; }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(900px 440px at 85% -12%, var(--cp-tint-blue), transparent 62%),
+        var(--cp-page);
+      color: var(--cp-text);
+      font-family: var(--cp-font);
+      font-weight: 300;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: var(--cp-maxw); margin: 0 auto; padding: 0 16px; }
+    a { color: var(--cp-link); text-underline-offset: 2px; }
+    a:hover { color: var(--cp-link-hover); text-decoration: underline; }
+    h1, h2, h3 { font-weight: 300; line-height: 1.1; letter-spacing: -0.022em; }
+    code, pre, .mono { font-family: var(--cp-mono); }
+    code { font-size: .92em; overflow-wrap: anywhere; }
+
+    /* ---- top bar ---- */
+    header.site {
+      border-bottom: 1px solid var(--cp-border);
+      background: color-mix(in srgb, var(--cp-bg) 70%, transparent);
+      backdrop-filter: blur(8px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    header.site .wrap { display: flex; align-items: center; gap: 14px; height: 60px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; }
+    .brand .logo { height: 26px; width: auto; display: block; }
+    .brand .by { color: var(--cp-muted); font-weight: 500; font-size: .86rem; }
+    header.site .spacer { flex: 1; }
+    .ghost-link { color: var(--cp-muted); font-size: .9rem; text-decoration: none; }
+    .ghost-link:hover { color: var(--cp-text); }
+
+    /* ---- hero ---- */
+    .hero { padding: 54px 0 20px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--cp-accent);
+      border: 1px solid color-mix(in srgb, var(--cp-accent) 45%, transparent);
+      background: color-mix(in srgb, var(--cp-accent) 10%, transparent);
+      padding: 5px 12px; border-radius: var(--cp-radius-pill);
+    }
+    .hero h1 { font-size: clamp(1.9rem, 4.6vw, 3.1rem); margin: 18px 0 10px; max-width: 18ch; }
+    .hero p.lede { font-size: clamp(1.02rem, 1.6vw, 1.22rem); color: var(--cp-muted); max-width: 70ch; margin: 0; }
+
+    /* ---- generic surfaces ---- */
+    section.block { padding: 18px 0; }
+    .card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: var(--cp-radius);
+      padding: 22px;
+      box-shadow: var(--cp-shadow);
+    }
+    .grid-2 { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    @media (min-width: 820px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .muted { color: var(--cp-muted); }
+    h2.section-title { font-size: 1.4rem; margin: 6px 0 4px; }
+    .section-sub { color: var(--cp-muted); margin: 0 0 14px; max-width: 76ch; }
+
+    /* ---- explainer ---- */
+    .explainer details {
+      border: 1px solid var(--cp-border); border-radius: var(--cp-radius);
+      background: color-mix(in srgb, var(--cp-surface) 70%, transparent); margin-top: 12px;
+    }
+    .explainer summary {
+      cursor: pointer; list-style: none; padding: 16px 20px; font-weight: 650;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .explainer summary::-webkit-details-marker { display: none; }
+    .explainer summary::after { content: "+"; margin-left: auto; color: var(--cp-accent); font-size: 1.3rem; line-height: 1; }
+    .explainer details[open] summary::after { content: "\2013"; }
+    .explainer .body { padding: 0 20px 18px; color: var(--cp-text); }
+    .explainer .body p { color: var(--cp-muted); }
+    .explainer .body ul { color: var(--cp-muted); padding-left: 20px; }
+    .explainer .body strong { color: var(--cp-text); }
+
+    .route {
+      display: grid; gap: 10px; margin: 6px 0 2px;
+      grid-template-columns: 1fr;
+    }
+    .route .hop {
+      border: 1px solid var(--cp-border); border-radius: var(--cp-radius-sm);
+      padding: 12px 14px; background: var(--cp-surface-2);
+    }
+    .route .hop b { color: var(--cp-accent); }
+
+    /* ---- stepper ---- */
+    .stepper { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 4px; padding: 0; list-style: none; }
+    .stepper li {
+      display: flex; align-items: center; gap: 9px; font-size: .9rem; color: var(--cp-muted);
+      border: 1px solid var(--cp-border); border-radius: var(--cp-radius-pill); padding: 6px 13px 6px 8px;
+      background: color-mix(in srgb, var(--cp-surface) 55%, transparent);
+    }
+    .stepper .dot {
+      width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+      font-size: .78rem; font-weight: 800; background: var(--cp-surface-2); color: var(--cp-muted);
+      border: 1px solid var(--cp-border);
+    }
+    .stepper li.active { color: var(--cp-text); border-color: color-mix(in srgb, var(--cp-accent) 55%, transparent); }
+    .stepper li.active .dot { background: var(--cp-accent); color: var(--cp-accent-ink); border-color: transparent; }
+    .stepper li.done .dot { background: var(--cp-ok); color: #042; border-color: transparent; }
+    .stepper li.done .dot::after { content: "\2713"; }
+    .stepper li.done .dot span { display: none; }
+
+    /* ---- form ---- */
+    label.field { display: block; margin: 0 0 14px; }
+    label.field .lab { display: block; font-weight: 600; margin-bottom: 6px; }
+    label.field .hint { font-weight: 400; color: var(--cp-muted); font-size: .86rem; }
+    label.field.confirm { display: flex; gap: 10px; align-items: flex-start; }
+    label.field.confirm input { margin-top: 4px; flex: none; }
+    label.field.confirm code { overflow-wrap: anywhere; }
+    .warn-text { display: block; color: var(--cp-warn); font-weight: 600; margin-top: 4px; }
+    input, select, button { font: inherit; }
+    input[type="url"], input[type="password"], input[type="search"], select {
+      width: 100%; padding: 11px 13px; color: var(--cp-text);
+      background: var(--cp-bg); border: 1px solid var(--cp-border); border-radius: var(--cp-radius-sm);
+    }
+    input:focus, select:focus, button:focus-visible {
+      outline: 2px solid var(--cp-accent); outline-offset: 1px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-weight: 500;
+      padding: 11px 20px; border-radius: var(--cp-radius-lg); border: 1px solid transparent;
+      background: var(--cp-accent); color: var(--cp-accent-ink);
+      transition: background .18s cubic-bezier(.4,0,.2,1), filter .18s;
+    }
+    .btn:hover { background: var(--cp-blue-600); }
+    .btn[disabled] { opacity: .55; cursor: progress; }
+    .btn.secondary { background: transparent; color: var(--cp-text); border-color: var(--cp-border); }
+    .btn.secondary:hover { background: color-mix(in srgb, var(--cp-ink) 6%, transparent); }
+
+    /* ---- probe cards ---- */
+    .probe { display: grid; gap: 7px; }
+    .probe h3 { margin: 0; font-size: 1rem; }
+    .probe .path { font-size: .85rem; color: var(--cp-muted); }
+    .status { font-weight: 700; font-size: .92rem; display: inline-flex; align-items: center; gap: 8px; }
+    .status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+    .status.pending { color: var(--cp-warn); }
+    .status.ok { color: var(--cp-ok); }
+    .status.blocked { color: var(--cp-danger); }
+    pre {
+      margin: 4px 0 0; overflow: auto; max-height: 240px; padding: 12px;
+      background: var(--cp-bg); border: 1px solid var(--cp-border); border-radius: var(--cp-radius-sm);
+      font-size: .82rem; white-space: pre-wrap;
+    }
+
+    /* ---- fingerprint result banner ---- */
+    .verdict { display: grid; gap: 14px; }
+    .verdict .headline { font-size: clamp(1.3rem, 3vw, 1.9rem); margin: 0; }
+    .verdict .headline .ver { color: var(--cp-accent); }
+    .verdict .stat-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .stat {
+      border: 1px solid var(--cp-border); border-radius: var(--cp-radius-sm);
+      padding: 12px 16px; background: var(--cp-surface-2); min-width: 130px;
+    }
+    .stat .n { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+    .stat .n.danger { color: var(--cp-danger); }
+    .stat .n.warn { color: var(--cp-warn); }
+    .stat .k { color: var(--cp-muted); font-size: .82rem; margin-top: 5px; }
+
+    /* ---- CVE table ---- */
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 14px; }
+    .filters input[type="search"] { flex: 1 1 18rem; }
+    .filters select { flex: 0 1 15rem; }
+    .toggle-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .table-wrap { overflow: auto; max-height: 75vh; border: 1px solid var(--cp-border); border-radius: var(--cp-radius); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .9rem; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
+    thead th { position: sticky; top: 0; z-index: 2; background: var(--cp-surface); white-space: nowrap; font-size: .8rem; letter-spacing: .03em; text-transform: uppercase; color: var(--cp-muted); box-shadow: inset 0 -1px 0 var(--cp-border); }
+    tbody tr:hover { background: color-mix(in srgb, var(--cp-accent) 7%, transparent); }
+    .badge { border-radius: var(--cp-radius-pill); padding: 3px 9px; font-size: .74rem; font-weight: 800; color: #fff; white-space: nowrap; }
+    .CRITICAL { background: var(--cp-critical); }
+    .HIGH { background: var(--cp-high); }
+    .MEDIUM { background: var(--cp-medium); color: #3a2a00; }
+    .LOW { background: var(--cp-low); }
+    .UNKNOWN, .NONE { background: var(--cp-none); }
+    .VULN { background: var(--cp-critical); }
+    .INDET { background: var(--cp-medium); color: #3a2a00; }
+    .links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .links a { white-space: nowrap; font-size: .84rem; }
+    .remote {
+      display: inline-block; padding: 3px 8px; border: 1.5px solid var(--cp-danger);
+      border-radius: var(--cp-radius-sm); color: var(--cp-danger); font-size: .74rem; font-weight: 800;
+    }
+
+    /* ---- progressive reveal ---- */
+    [hidden] { display: none !important; }
+    .step { scroll-margin-top: 76px; }
+    .reveal-anim { animation: reveal .45s ease both; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .locked-note {
+      border: 1px dashed var(--cp-border); border-radius: var(--cp-radius);
+      padding: 20px; color: var(--cp-muted); text-align: center;
+    }
+
+    .cta-card { background: linear-gradient(135deg, var(--cp-tint-blue), var(--cp-surface) 72%); border-color: color-mix(in srgb, var(--cp-accent) 35%, var(--cp-border)); }
+    .cta-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+    footer.site { border-top: 1px solid var(--cp-border); margin-top: 40px; padding: 26px 0 50px; color: var(--cp-muted); font-size: .88rem; }
+    @media (prefers-reduced-motion: reduce) { .reveal-anim { animation: none; } html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <span class="brand" id="brand">
+        <svg class="logo" aria-label="ControlPlane" fill="currentColor" height="24" role="img" viewBox="0 0 176 37" xmlns="http://www.w3.org/2000/svg"><path d="m65.799 17.13 1.472-1.398a4.4 4.4 0 0 0-1.742-1.352q-1.071-.477-2.432-.477-1.492 0-2.637.633a4.5 4.5 0 0 0-1.79 1.79q-.643 1.156-.643 2.666c0 1.006.212 1.874.633 2.637a4.46 4.46 0 0 0 1.78 1.78q1.147.634 2.62.633c.985 0 1.822-.173 2.553-.522a4.4 4.4 0 0 0 1.771-1.492l-1.51-1.248q-.895 1.173-2.686 1.174-1.212-.001-1.966-.82-.754-.821-.755-2.164c0-.895.253-1.578.755-2.124q.756-.82 1.966-.82 1.604-.001 2.61 1.099zm8.014-3.224q-1.565 0-2.76.633a4.56 4.56 0 0 0-1.855 1.78q-.66 1.147-.661 2.637c0 .994.221 1.896.661 2.666a4.55 4.55 0 0 0 1.855 1.79q1.192.634 2.76.633c1.044 0 1.942-.212 2.73-.633a4.56 4.56 0 0 0 1.846-1.79q.661-1.156.662-2.666c0-1.006-.222-1.874-.662-2.637a4.6 4.6 0 0 0-1.845-1.78q-1.184-.635-2.731-.633m0 2.069q1.23 0 2.014.84.782.839.782 2.18 0 1.34-.782 2.18-.784.837-2.014.839c-.82 0-1.528-.28-2.05-.84q-.782-.839-.782-2.18 0-1.34.782-2.18.784-.838 2.05-.84m13.346-2.088q-2.556.038-3.58 1.955v-1.864h-2.423v9.973h2.423v-4.904q0-1.248.7-2.05t1.91-.82q1.026 0 1.622.606.596.605.597 1.65v5.518h2.442v-6.227q0-1.77-.99-2.805-.987-1.035-2.701-1.035zm11.688 7.624q-.858.41-1.417.409-.523 0-.782-.289-.26-.29-.26-.979V16.16h2.851v-1.77h-2.85v-2.741h-2.404v2.74h-1.417l.019 1.771h1.398v4.92q0 1.473.82 2.228t2.105.756c.857 0 1.704-.243 2.498-.727l-.558-1.826zm4.884-5.61v-1.92h-2.422v9.972h2.422v-4.81q0-1.38.922-2.189.924-.811 2.471-.717V13.89q-1.154.018-2.024.532-.866.511-1.369 1.482zm9.451-1.995q-1.565 0-2.76.633a4.57 4.57 0 0 0-1.855 1.78q-.66 1.147-.661 2.637c0 .994.221 1.896.661 2.666a4.56 4.56 0 0 0 1.855 1.79q1.192.634 2.76.633c1.044 0 1.942-.212 2.731-.633a4.56 4.56 0 0 0 1.845-1.79q.662-1.156.662-2.666c0-1.006-.221-1.874-.662-2.637a4.6 4.6 0 0 0-1.845-1.78q-1.183-.635-2.731-.633m0 2.069q1.231 0 2.014.84.782.839.782 2.18 0 1.34-.782 2.18-.783.837-2.014.839c-.82 0-1.528-.28-2.05-.84q-.783-.839-.782-2.18 0-1.34.782-2.18.784-.838 2.05-.84m7.437 7.978h2.423V10.121h-2.423zM131.824 14.036q-1.23 0-2.173.522a3.76 3.76 0 0 0-1.482 1.491v-1.956h-1.734V27.57h1.734v-5.574a3.74 3.74 0 0 0 1.492 1.491q.95.524 2.199.522 1.379.002 2.452-.625 1.072-.625 1.66-1.752.588-1.126.587-2.581c0-.97-.2-1.853-.597-2.61a4.36 4.36 0 0 0-1.677-1.772q-1.083-.633-2.461-.632m-.337 8.462q-.95 0-1.706-.448a3.17 3.17 0 0 1-1.183-1.24q-.43-.79-.429-1.816c0-.683.142-1.256.429-1.79q.429-.801 1.183-1.248a3.3 3.3 0 0 1 1.706-.448q.95 0 1.696.448.746.447 1.174 1.248a3.7 3.7 0 0 1 .429 1.79c0 .66-.14 1.273-.419 1.81q-.419.801-1.174 1.248a3.3 3.3 0 0 1-1.706.448zm7.586 1.455h1.735V10.121h-1.735zm12.956 0-.019-6.486q-.018-1.62-1.025-2.527-1.006-.903-2.851-.904-1.248 0-2.153.308-.906.306-1.966.996l.727 1.193q1.548-1.062 3.038-1.063 1.23 0 1.875.567.642.57.642 1.612v.467h-3.132q-1.754.019-2.731.792-.979.773-.98 2.098 0 .858.419 1.547.418.69 1.193 1.08.774.391 1.8.392 2.348.001 3.448-1.453v1.379h1.715zm-4.809-1.362q-.97 0-1.547-.447-.578-.448-.578-1.213t.568-1.119q.568-.353 1.742-.353h2.89v.989q-.167.97-1.016 1.556-.847.588-2.059.587m13.382-8.555q-2.759.036-3.746 2.143v-2.088h-1.735v9.86h1.735v-5.277q.11-1.324.941-2.153.829-.829 2.153-.85 1.23 0 1.93.7.7.701.7 1.95v5.63h1.734v-6.095q0-1.789-.989-2.805-.988-1.015-2.721-1.015zm10.757 0q-1.437 0-2.553.642a4.55 4.55 0 0 0-1.742 1.77q-.624 1.13-.625 2.582-.001 1.455.625 2.592a4.4 4.4 0 0 0 1.752 1.76q1.127.626 2.582.626 1.248 0 2.273-.428a5 5 0 0 0 1.752-1.212l-.951-.99q-.559.578-1.313.896a4.2 4.2 0 0 1-1.632.317q-1.324 0-2.227-.782-.905-.783-1.11-2.105h7.791q.019-.187.019-.558 0-2.404-1.174-3.756t-3.467-1.352zm-3.188 4.323q.167-1.325 1.035-2.105.865-.783 2.172-.782c.871 0 1.615.257 2.163.775q.82.772.895 2.115h-6.262z"></path><path d="M12.632 30.088H3.705a1.12 1.12 0 0 1-.972-.558 1.08 1.08 0 0 1 .015-1.107L19.488.947c.2-.33.573-.585.956-.534.39 0 .75.2.953.527l4.759 7.69-1.906 1.144-3.8-6.137-7.15 11.736-7.624 12.516h6.956z"></path><path d="M50.848 36.642H8.442c-.402 0-.775-.214-.974-.563a1.08 1.08 0 0 1 .024-1.111L28.693.899c.405-.652 1.497-.652 1.903 0l21.202 34.069c.21.341.219.763.022 1.111-.198.35-.57.563-.975.563zm-40.411-2.199h38.419L29.646 3.577z"></path></svg>
+        <span class="by">security lab</span>
+      </span>
+      <span class="spacer"></span>
+      <a class="ghost-link" href="#explainer">How it works</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <span class="eyebrow">Drive-by &middot; client-side &middot; no phone-home</span>
+      <h1>See what a hostile web page can learn about your internal GitLab</h1>
+      <p class="lede">
+        Open this page and point it at a GitLab you can reach. Through nothing but
+        the browser, it fingerprints the version, then shows which CVEs that version
+        is exposed to and which of those a malicious website might reach with no
+        login. On recent Chrome, reaching an internal address also needs the visitor
+        to accept a local-network permission prompt.
+      </p>
+    </section>
+
+    <!-- ===================== EXPLAINER ===================== -->
+    <section class="block explainer" id="explainer">
+      <h2 class="section-title">What this is, and why it matters</h2>
+      <p class="section-sub">
+        Many organisations run GitLab as the internal, free alternative to GitHub and
+        assume a VPN or an IP allowlist keeps it safe. That assumption is the gap.
+      </p>
+
+      <details open>
+        <summary>The drive-by CORS route, precisely</summary>
+        <div class="body">
+          <p>
+            By default GitLab answers cross-origin requests to <code>/api/*</code> and
+            <code>/api/graphql</code> from <strong>any</strong> origin, with
+            <code>Access-Control-Allow-Origin: *</code>. So a page on
+            <code>evil.com</code> can read anonymous JSON from
+            <code>git.internal.example</code> through the browser of anyone who merely
+            visits <code>evil.com</code>. No login, and no click beyond the visit (on
+            recent Chrome, an internal target also needs the visitor to accept a
+            local-network permission prompt; see below). The visitor's browser is the
+            bridge from the attacker's public page to the internal host.
+          </p>
+          <div class="route">
+            <div class="hop"><b>1.</b> Visitor on the inside opens <code>evil.com</code>.</div>
+            <div class="hop"><b>2.</b> That page fetches <code>https://git.internal/api/*</code>; the browser sends it from the visitor's allowlisted network.</div>
+            <div class="hop"><b>3.</b> GitLab replies with <code>Access-Control-Allow-Origin: *</code>, so the attacker's page can read the response.</div>
+          </div>
+          <ul>
+            <li>A GitLab on a public IP protected only by an IP allowlist is reachable this way: the request comes from the visitor's allowlisted browser, not the attacker. The attacker sees what an anonymous user inside the allowlist would see, which is enough to fingerprint the version.</li>
+            <li>The wildcard is set <strong>without credentials</strong>, so even if a browser attached the visitor's session cookie, the attacker's page could not read the response. What it can read is anonymous data only, and this tool never counts a CVE as reachable when the real trigger needs a login.</li>
+            <li>Chrome 142 and later put a public page reaching a private or loopback address behind a Local Network Access permission prompt. Firefox, Safari, older Chrome, Chrome where an administrator has turned the control off, and any GitLab on a public IP are not gated by it. Nor is a hostile page that is itself served from the internal network (a compromised wiki or SharePoint page, for example).</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>What the page does, step by step</summary>
+        <div class="body">
+          <ul>
+            <li><strong>Proves the channel.</strong> It runs harmless cross-origin probes and shows the public REST API answering (readable), the version endpoint answering but needing a token, and the GraphQL schema reading cross-origin.</li>
+            <li><strong>Fingerprints the build.</strong> GitLab ships Webpack chunks whose filenames embed a content hash. The page requests a bundled set of these as preload resources and watches load versus 404; nothing is executed. A random-hash control probe first checks the server does not answer every path. A full match identifies a specific frontend build. The anonymous GraphQL Query-schema SHA is shown for reference; it is not yet used in matching.</li>
+            <li><strong>Lists exposure.</strong> Only once a version is identified does it reveal the CVEs that version is exposed to, each marked vulnerable or indeterminate.</li>
+            <li><strong>Flags the drive-by subset.</strong> It then flags which CVEs have a likely or conditional anonymous browser path, from a review of the public advisories and reproductions. None of these paths has been tested from a browser.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>What it can and cannot resolve (honest limits)</summary>
+        <div class="body">
+          <p>
+            Some patch releases ship a byte-identical frontend because the patch was
+            backend only. Unauthenticated client-side fingerprinting therefore resolves
+            to a <strong>build class</strong> (the set of patches that share one
+            frontend), not always a single patch. Every collected build is told apart
+            from every other, but a patch released after the corpus was collected can
+            serve the same assets as the newest collected patch of its minor line, so
+            for the three minor lines GitLab still patches, that later patch is kept
+            as a candidate rather than ruled out. CVE ranges
+            come from NVD, corrected where they contradict GitLab's own advisory. The
+            exact patch is available from the authenticated <code>/api/v4/version</code>
+            endpoint, so the page accepts an optional admin-approved read-only token and
+            uses it when present. This is a defensive demonstration for authorised testing
+            of your own infrastructure: it fingerprints and prioritises, it does not
+            weaponise, and it contacts no third party at runtime.
+          </p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ===================== STEPPER ===================== -->
+    <section class="block">
+      <ol class="stepper" id="stepper">
+        <li data-step="1" class="active"><span class="dot"><span>1</span></span> Point at a GitLab</li>
+        <li data-step="2"><span class="dot"><span>2</span></span> Prove the CORS channel</li>
+        <li data-step="3"><span class="dot"><span>3</span></span> Fingerprint the version</li>
+        <li data-step="4"><span class="dot"><span>4</span></span> See the exposure</li>
+      </ol>
+    </section>
+
+    <!-- ===================== STEP 1: TARGET ===================== -->
+    <section class="block step" id="step1">
+      <div class="card">
+        <h2 class="section-title">1. Point it at a GitLab</h2>
+        <p class="section-sub">
+          Enter an origin you are authorised to assess, then press Enter (or leave the
+          field) to run the anonymous probes. Nothing is
+          contacted while you type. If you add a token, only Enter or Run starts a
+          probe: confirm the host it may go to first. This page
+          is served from <code id="page-origin"></code>, so every probe below is a
+          genuine cross-origin request, exactly as a hostile site would make.
+        </p>
+        <div class="grid-2">
+          <label class="field">
+            <span class="lab">GitLab origin</span>
+            <input id="gitlab-origin" type="url" placeholder="https://gitlab.example.com" spellcheck="false" autocomplete="off">
+          </label>
+          <label class="field">
+            <span class="lab">Admin-approved read-only token <span class="hint">(optional, for the exact patch)</span></span>
+            <input id="token" type="password" autocomplete="off" placeholder="Not stored, sent only to the host you confirm">
+          </label>
+        </div>
+        <!-- The token is sent only after the user confirms the exact host it goes to. The
+             confirmation is tied to that origin and clears whenever the address changes,
+             and nothing auto-runs while a token is entered. -->
+        <label class="field confirm" id="token-confirm-row" hidden>
+          <input id="token-confirm" type="checkbox">
+          <span>Send this token to <code id="token-host"></code> when I press Run.
+            <span class="hint">Unticked, the probes run without it.</span>
+            <strong id="token-http-warn" class="warn-text" hidden>This is plain HTTP, so the token would cross the network unencrypted.</strong>
+          </span>
+        </label>
+        <button id="run" class="btn" type="button">Run benign probes</button>
+      </div>
+    </section>
+
+    <!-- ===================== STEP 2: CORS PROOF ===================== -->
+    <section class="block step" id="step2" hidden>
+      <h2 class="section-title">2. The CORS channel, proven live</h2>
+      <p class="section-sub">
+        These are the only two cross-origin-readable surfaces the tool uses:
+        <code>/api/*</code> and asset presence. Everything else is built on them.
+      </p>
+      <div class="grid-2">
+        <div class="card probe">
+          <h3>Public REST API</h3>
+          <div class="path"><code>/api/v4/projects?visibility=public&amp;per_page=1</code></div>
+          <span id="projects-status" class="status pending">Waiting</span>
+          <pre id="projects-output"></pre>
+        </div>
+        <div class="card probe">
+          <h3>Version REST API</h3>
+          <div class="path"><code>/api/v4/version</code>: CORS-readable, but requires a token</div>
+          <span id="version-status" class="status pending">Waiting</span>
+          <pre id="version-output"></pre>
+        </div>
+      </div>
+      <div class="card probe" style="margin-top:16px">
+        <h3>Build fingerprint</h3>
+        <div class="path">Content-hashed asset presence, checked against a random-hash control. No asset is executed; no CORS grant is needed for presence. The anonymous GraphQL Query-schema SHA is recorded for reference only.</div>
+        <span id="fingerprint-status" class="status pending">Waiting</span>
+        <pre id="fingerprint-output"></pre>
+      </div>
+    </section>
+
+    <!-- ===================== STEP 3: FINGERPRINT VERDICT ===================== -->
+    <section class="block step" id="step3" hidden>
+      <h2 class="section-title">3. What this instance is</h2>
+      <div class="card verdict" id="verdict">
+        <p class="headline" id="verdict-headline">Resolving&hellip;</p>
+        <p class="muted" id="verdict-detail"></p>
+        <div class="stat-row" id="verdict-stats"></div>
+      </div>
+    </section>
+
+    <!-- ===================== STEP 4: EXPOSURE ===================== -->
+    <section class="block step" id="step4" hidden>
+      <h2 class="section-title">4. CVE exposure for the detected version</h2>
+      <p class="section-sub" id="cve-note"></p>
+
+      <div class="toggle-row">
+        <button id="toggle-browser" class="btn secondary" type="button" aria-pressed="false">
+          Show only the drive-by browser-reachable subset
+        </button>
+        <span class="muted" id="cve-status">Waiting for version detection</span>
+      </div>
+
+      <div class="filters">
+        <input id="cve-search" type="search" placeholder="Filter by CVE or CWE">
+        <select id="cve-vuln" aria-label="Filter by vulnerability status for the detected build">
+          <option value="">All vuln states</option>
+          <option value="vulnerable">Definitely vulnerable</option>
+          <option value="indeterminate">Indeterminate (patch- or edition-dependent)</option>
+        </select>
+        <select id="cve-severity" aria-label="Filter by severity">
+          <option value="">All severities</option>
+          <option>CRITICAL</option>
+          <option>HIGH</option>
+          <option>MEDIUM</option>
+          <option>LOW</option>
+          <option>NONE</option>
+          <option>UNKNOWN</option>
+        </select>
+        <select id="cve-remote" aria-label="Filter by browser API assessment">
+          <option value="">All Browser/API states</option>
+          <option value="compatible">Any compatible or conditional</option>
+          <option value="confirmed-compatible">Confirmed compatible</option>
+          <option value="likely-compatible">Likely compatible</option>
+          <option value="conditional-compatible">Conditional compatible</option>
+          <option value="unresolved">Unresolved</option>
+          <option value="outside-threat-model">Outside threat model</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Published</th>
+              <th>CVE</th>
+              <th>CVSS</th>
+              <th>Severity</th>
+              <th>Vulnerable?</th>
+              <th>Browser/API assessment</th>
+              <th>Links</th>
+            </tr>
+          </thead>
+          <tbody id="cve-list"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- locked placeholder shown before fingerprinting -->
+    <section class="block" id="locked" hidden>
+      <div class="locked-note">
+        No version fingerprinted yet, so there is nothing to assess. Point the tool at a
+        GitLab above; the exposure list appears only once a build is identified.
+      </div>
+    </section>
+
+    <!-- shown when a GitLab answered but its API refused the cross-origin read. This closes
+         the READABLE channel only; it is not a clean bill of health. -->
+    <section class="block step" id="cors-blocked" hidden>
+      <h2 class="section-title">3. This instance's API is closed to cross-origin reads</h2>
+      <div class="card">
+        <p>
+          A GitLab answered at this address (a known build asset loaded from it), but the
+          browser <strong>blocked</strong> the cross-origin read of its <code>/api</code>:
+          it does not return <code>Access-Control-Allow-Origin</code> for this page's
+          origin. A hostile website therefore cannot read this instance's API through a
+          visitor's browser, which closes the channel that the readable-response browser
+          paths in this tool depend on. That is a real improvement, but it is
+          <strong>not a clean bill of health</strong>:
+        </p>
+        <ul class="muted">
+          <li>The version can still be fingerprinted. Asset presence needs no CORS, which is how this page recognised the instance.</li>
+          <li>Requests can still be <strong>sent</strong>, just not read. "Blind" triggers that never need to read a response (a cross-origin form POST or GET, such as some denial-of-service bugs) are not stopped by CORS, and nor are CSRF-style side effects.</li>
+          <li>If the CORS policy is ever relaxed, or a reverse proxy or CDN in front adds a permissive <code>Access-Control-Allow-Origin</code>, the readable channel returns at once. Re-run this check after any such change.</li>
+          <li>An attacker who is already on the network, or who can get a victim to run a tool rather than just open a page, is a different threat model this tool does not measure.</li>
+        </ul>
+        <p class="muted">
+          To confirm independently, inspect the response headers on
+          <code>/api/v4/projects</code> and check for an <code>Access-Control-Allow-Origin</code>
+          that matches an arbitrary origin.
+        </p>
+      </div>
+    </section>
+
+    <!-- shown when the probe was stopped by the browser's Local Network Access permission
+         (or the host was simply unreachable), NOT by the target's CORS policy. This is a
+         browser-side control and is NOT evidence the instance is safe. -->
+    <section class="block step" id="lna-blocked" hidden>
+      <h2 class="section-title">3. Your browser blocked this probe (Local Network Access)</h2>
+      <div class="card">
+        <p>
+          The probes to <code id="lna-target"></code> never left your browser. Every
+          channel failed at once and the target is a private or loopback address, which
+          is the signature of Chrome's <strong>Local Network Access</strong> permission
+          (enforced from Chrome 142), not of the target refusing cross-origin reads.
+        </p>
+        <p>
+          <strong>This is a control in your browser, not a verdict on the target.</strong>
+          It is not evidence that the instance is safe. Grant the permission and run the
+          probes again:
+        </p>
+        <ul class="muted">
+          <li>Click <strong>Allow</strong> on Chrome's local network permission prompt, then press the button below. If you already clicked Block, open this page's site permissions, allow local network access, and re-run.</li>
+          <li>This control applies only to recent Chromium reaching a <strong>private or loopback</strong> address. It does <strong>not</strong> apply to a GitLab on a public IP, nor to Firefox or Safari, nor to older Chrome or Chrome where an administrator has turned it off. In those cases the drive-by path is unaffected.</li>
+          <li>If the address is simply unreachable from this browser (wrong host, down, or firewalled), it looks the same here. Check the address and try again.</li>
+        </ul>
+        <button id="lna-retry" class="btn" type="button">Allow, then re-run the probes</button>
+      </div>
+    </section>
+
+    <!-- shown when NOTHING answered at the address: no response of any kind. Not a verdict. -->
+    <section class="block step" id="unreachable" hidden>
+      <h2 class="section-title">3. Could not reach this address from your browser</h2>
+      <div class="card">
+        <p>
+          Nothing at <code id="unreachable-target"></code> answered, not even with an error
+          page. <strong>This is not a verdict on the target.</strong> Common causes:
+        </p>
+        <ul class="muted">
+          <li id="unreachable-http">The address is plain <code>http://</code>. This page is served over HTTPS, and browsers block an HTTPS page from fetching plain-HTTP addresses (mixed content). Try the <code>https://</code> address.</li>
+          <li>A typo, a host that is down, or a name that only resolves on a VPN or internal network you are not on.</li>
+          <li>On recent Chrome, an internal host name can be blocked by the Local Network Access permission. If you saw a prompt about devices on your local network, allow it and re-run.</li>
+          <li>A firewall or proxy dropping the connection.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- shown when SOMETHING answered but no GitLab was identified and no API was readable. -->
+    <section class="block step" id="inconclusive" hidden>
+      <h2 class="section-title">3. Inconclusive: no GitLab recognised at this address</h2>
+      <div class="card">
+        <p>
+          A server answered at <code id="inconclusive-target"></code>, but none of the known
+          GitLab builds was recognised there.
+          <span id="inconclusive-closed">No GitLab API was readable cross-origin either.
+          <strong>That is not proof the instance is safe.</strong></span>
+          <span id="inconclusive-readable">It does send a permissive
+          <code>Access-Control-Allow-Origin</code>, so its responses are readable
+          cross-origin, but it did not answer like a GitLab API.</span>
+        </p>
+        <ul class="muted">
+          <li id="inconclusive-path">You entered a path (<code id="inconclusive-path-value"></code>). Enter the GitLab root instead, for example <code id="inconclusive-root"></code>, unless GitLab really is installed under that path.</li>
+          <li>The build may be newer than the bundled corpus, or customised. If the API is closed to cross-origin reads as well, an approved token will not help either; check the <code>Access-Control-Allow-Origin</code> header on <code>/api/v4/projects</code> directly.</li>
+          <li>The address may not be a GitLab at all.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== CALL TO ACTION ===================== -->
+    <section class="block" id="cta">
+      <div class="card cta-card">
+        <h2 class="section-title">Want help closing this down?</h2>
+        <p class="section-sub">
+          If any of this is relevant to your estate, or you would like advice on the
+          mitigations that shut the drive-by path and harden the browser-facing
+          attack surface around your GitLab, ControlPlane would be glad to help.
+        </p>
+        <div class="cta-actions">
+          <a class="btn" href="https://control-plane.io/contact" target="_blank" rel="noopener noreferrer">Contact ControlPlane</a>
+          <a class="btn secondary" href="mailto:solutions@control-plane.io">solutions@control-plane.io</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DISCLAIMER ===================== -->
+    <section class="block" id="disclaimer">
+      <div class="card">
+        <h2 class="section-title">Disclaimer and liability</h2>
+        <p class="section-sub">
+          This tool fingerprints a GitLab build and lists the CVEs recorded against
+          that version. It is a prioritisation aid, not a verdict. We have not
+          live-tested every known exploit against every version, so reality may vary:
+          an instance may have other mitigation controls in place that this tool
+          cannot see from the outside, and there may be exploits that are unknown to
+          us. The real exposure could therefore be better, or worse, than what is
+          shown here. Always confirm any individual finding with your own
+          configuration, edition, authentication and feature-prerequisite review.
+        </p>
+        <p class="section-sub">
+          Pull requests are welcome: if you can improve the corpus, the CVE mapping or
+          the browser-reachability assessments, please contribute. The tool is
+          provided as-is, with no warranty of any kind. ControlPlane accepts no
+          liability for any use of this tool, or for any decision taken on the basis
+          of its output. Use it only against GitLab instances you are authorised to
+          assess.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      Open source, MIT licensed. Runs entirely in your browser and never phones home:
+      the version corpus and the CVE catalogue are bundled into this page. Pull
+      requests welcome. Provided as-is with no warranty; ControlPlane accepts no
+      liability. Use it only against GitLab instances you are authorised to assess.
+    </div>
+  </footer>
+
+  <script>
+    /* Data seam: use inlined globals in the built single-file artifact, otherwise
+       fetch from disk for local development (python3 -m http.server --directory poc). */
+    async function loadData(globalName, url) {
+      if (window[globalName]) return window[globalName];
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`${url} HTTP ${response.status}`);
+      return response.json();
+    }
+
+    let gitlab = '';
+    let runSeq = 0;
+    let browserOnly = false;
+    let corsLive = null; // null = unknown, true = /api readable cross-origin, false = blocked
+    let apiLooksGitlab = false; // a readable /api reply had GitLab's shape
+    let gitlabRecognised = false; // true once a corpus asset loaded (control failed) or the GraphQL API answered
+    document.querySelector('#page-origin').textContent = location.origin;
+
+    /* ---------- progressive reveal ---------- */
+    function revealStep(id) {
+      const el = document.querySelector('#' + id);
+      if (el && el.hidden) { el.hidden = false; el.classList.add('reveal-anim'); }
+    }
+    function hideStep(id) { const el = document.querySelector('#' + id); if (el) el.hidden = true; }
+    function setStepState(n, state) {
+      const li = document.querySelector(`.stepper li[data-step="${n}"]`);
+      if (!li) return;
+      li.classList.remove('active', 'done');
+      if (state) li.classList.add(state);
+    }
+
+    function render(name, kind, summary, value) {
+      const status = document.querySelector(`#${name}-status`);
+      status.className = 'status ' + kind;
+      status.textContent = summary;
+      document.querySelector(`#${name}-output`).textContent =
+        typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+    }
+
+    const PROBE_TIMEOUT_MS = 10000;
+    const RENDER_LIMIT = 4000; // characters of a target's response shown on the page
+
+    // A CORS fetch that RESOLVES means the target's response was readable cross-origin,
+    // whatever its status or body. Readability is decided there, not by whether the
+    // body parses as JSON: a readable 429 or proxy error page still proves the channel.
+    // Requests carrying a token refuse redirects, so the token cannot follow a 3xx to
+    // another host. The target is untrusted: bodies are capped before rendering.
+    async function getJson(name, path, options = {}, origin = gitlab) {
+      const myRun = runSeq; // results from a superseded run are dropped, even for the same origin
+      try {
+        const carriesToken = Boolean(options.headers && options.headers['Private-Token']);
+        const response = await fetch(origin + path, {
+          mode: 'cors', signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+          ...(carriesToken ? { redirect: 'error' } : {}), ...options,
+        });
+        const text = await response.text();
+        let body = null;
+        try { body = JSON.parse(text); } catch { body = null; }
+        if (origin !== gitlab || myRun !== runSeq) return;
+        render(name, 'ok', `Readable: HTTP ${response.status}`, {
+          responseType: response.type,
+          status: response.status,
+          accessControlAllowOriginWasAccepted: true,
+          body: body === null ? clip(text) : text.length <= RENDER_LIMIT ? body : clip(text),
+        });
+        if ((name === 'projects' && Array.isArray(body)) ||
+            (name === 'version' && (typeof body?.version === 'string' || body?.message === '401 Unauthorized'))) apiLooksGitlab = true;
+        if (name === 'projects' || name === 'version') { corsLive = true; hideStep('cors-blocked'); hideStep('lna-blocked'); hideStep('unreachable'); hideStep('inconclusive'); maybeRevealExposure(); }
+        return { response, body };
+      } catch (error) {
+        if (origin !== gitlab || myRun !== runSeq) return;
+        render(name, 'blocked', 'Browser blocked the read', String(error));
+        return null;
+      }
+    }
+
+    // token is captured by run() at the moment Run was pressed, and only when the user
+    // confirmed this exact origin. It is never read from the field here, so editing the
+    // field or the address mid-run cannot redirect it.
+    async function getVersion(origin, token) {
+      const myRun = runSeq;
+      const options = token ? { headers: { 'Private-Token': token } } : {};
+      const result = await getJson('version', '/api/v4/version', options, origin);
+      const reported = result?.body?.version;
+      if (typeof reported !== 'string') return; // a hostile or non-GitLab body is ignored
+      const version = reported.match(/^\d+\.\d+(?:\.\d+)?/)?.[0];
+      // Newer GitLab reports an enterprise boolean; older EE reports a "-ee" suffix.
+      const enterprise = typeof result.body.enterprise === 'boolean' ? result.body.enterprise
+        : /-ee\b/i.test(reported) ? true : undefined;
+      if (version && origin === gitlab && myRun === runSeq) setCatalogVersion(version, enterprise);
+    }
+    function clip(text) {
+      const value = String(text ?? '');
+      return value.length > RENDER_LIMIT ? `${value.slice(0, RENDER_LIMIT)}\n… (${value.length - RENDER_LIMIT} more characters not shown)` : value;
+    }
+
+    function probeResource(path, origin) {
+      return new Promise((resolve) => {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'script';
+        const finish = (result) => { link.onload = null; link.onerror = null; link.remove(); resolve(result); };
+        link.onload = () => finish('load');
+        link.onerror = () => finish('error');
+        link.href = origin + path;
+        document.head.append(link);
+        setTimeout(() => finish('timeout'), 6000);
+      });
+    }
+
+    function probeImage(path, origin) {
+      return new Promise((resolve) => {
+        const image = new Image();
+        const finish = (result) => { image.onload = null; image.onerror = null; resolve(result); };
+        image.onload = () => finish('load');
+        image.onerror = () => finish('error');
+        image.src = origin + path;
+        setTimeout(() => finish('timeout'), 6000);
+      });
+    }
+
+    async function schemaSignature(origin) {
+      const response = await fetch(origin + '/api/graphql', {
+        method: 'POST',
+        mode: 'cors',
+        signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: '{ __type(name: "Query") { fields { name } } }' })
+      });
+      const json = await response.json();
+      const fields = json?.data?.__type?.fields?.map(({ name }) => name).sort() || [];
+      const bytes = new TextEncoder().encode(`${fields.join('\n')}\n`);
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      const sha256 = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+      return { fieldCount: fields.length, sha256 };
+    }
+
+    async function fingerprint(origin) {
+      const myRun = runSeq;
+      const stale = () => origin !== gitlab || myRun !== runSeq;
+      try {
+        const database = await loadData('__FINGERPRINTS__', 'fingerprints.json');
+        const builds = database.builds || [];
+
+        const assets = {};
+        const probe = async (path) => { assets[path] = await probeResource(path, origin);  };
+
+        // Negative control: an asset path shaped like a real one but with a random hash.
+        // A server that answers it (a catch-all page, an SSO redirect to a 200, a proxy)
+        // answers every path, so asset presence cannot identify a build there.
+        const randomHex = [...crypto.getRandomValues(new Uint8Array(10))].map((b) => b.toString(16).padStart(2, '0')).join('');
+        const controlPath = `/assets/webpack/webpack_runtime.${randomHex}.bundle.js`;
+        const controlResult = await probeResource(controlPath, origin);
+        if (stale()) return;
+        if (controlResult === 'load') {
+          render('fingerprint', 'blocked', 'This server answers every path', {
+            identifiedBuild: null,
+            interpretation: `A made-up asset path (${controlPath}) loaded successfully, so this server returns success for any URL. Asset presence cannot identify a build here. Supply an approved token for the authoritative version.`,
+          });
+          if (catalogSource !== 'token') showLocked('This server answers every path with success, so the build cannot be fingerprinted from asset presence. Supply an approved read-only token above for an authoritative version.');
+          return;
+        }
+        const CONCURRENCY = 6;
+        const runPool = async (items, worker) => {
+          let idx = 0;
+          const next = async () => { while (idx < items.length) { const i = idx++; await worker(items[i]); } };
+          await Promise.all(Array.from({ length: Math.min(CONCURRENCY, items.length) }, next));
+        };
+
+        // The GraphQL schema read runs in parallel; it is recorded but never decides and
+        // never blocks a match (the offline corpus carries no schema SHA to compare
+        // against, and some instances disable introspection).
+        const schemaPromise = schemaSignature(origin).catch((error) => ({ error: String(error) }));
+
+        // Phase 1: find the one build-class discriminator (a content-hashed runtime
+        // chunk, unique per build) that this instance actually serves. Probe them
+        // NEWEST-FIRST, a few at a time, and STOP at the first hit. A real remote
+        // instance only tolerates a handful of concurrent connections, so firing the
+        // whole corpus at once makes later probes time out and read as falsely
+        // absent; early-exit keeps it to a few dozen probes for recent versions; older
+        // versions sit further down the list and need more.
+        const byVersionDesc = (a, b) => {
+          const av = versionParts((a.versions || [])[0]) || [0, 0, 0];
+          const bv = versionParts((b.versions || [])[0]) || [0, 0, 0];
+          for (let i = 0; i < 3; i += 1) if (av[i] !== bv[i]) return bv[i] - av[i];
+          return 0;
+        };
+        const keyOrder = [];
+        const seenKey = new Set();
+        for (const build of [...builds].sort(byVersionDesc)) {
+          const first = (build.signals.assetsPresent || [])[0];
+          if (first && !seenKey.has(first)) { seenKey.add(first); keyOrder.push(first); }
+        }
+        let phase1Probes = 0;
+        for (let i = 0; i < keyOrder.length; i += CONCURRENCY) {
+          const chunk = keyOrder.slice(i, i + CONCURRENCY);
+          await Promise.all(chunk.map(probe));
+          phase1Probes += chunk.length;
+          if (stale()) return;
+          if (chunk.some((path) => assets[path] === 'load')) break;
+        }
+        // A single transient timeout must not hide the true build: if nothing loaded,
+        // retry the discriminators that timed out (as opposed to answering 404) once.
+        if (!keyOrder.some((path) => assets[path] === 'load')) {
+          const timedOut = keyOrder.filter((path) => assets[path] === 'timeout');
+          for (let i = 0; i < timedOut.length; i += CONCURRENCY) {
+            await Promise.all(timedOut.slice(i, i + CONCURRENCY).map(probe));
+            phase1Probes += Math.min(CONCURRENCY, timedOut.length - i);
+            if (stale()) return;
+            if (timedOut.slice(i, i + CONCURRENCY).some((path) => assets[path] === 'load')) break;
+          }
+        }
+
+        const candidates = builds.filter(({ signals }) => {
+          const first = (signals.assetsPresent || [])[0];
+          return first && assets[first] === 'load';
+        });
+
+        // Phase 2: confirm each candidate's full asset set, re-probing fresh through
+        // the same small concurrency window so a single transient timeout cannot
+        // sink a correct match. Logo/image signals are probed too.
+        const confirmPaths = [...new Set(candidates.flatMap(({ signals }) =>
+          [...(signals.assetsPresent || []), ...(signals.assetsAbsent || [])]))];
+        const imagePaths = [...new Set(candidates.flatMap(({ signals }) => signals.imagesPresent || []))];
+        const images = {};
+        await runPool(confirmPaths, probe);
+        await runPool(imagePaths, async (path) => { images[path] = await probeImage(path, origin); });
+        if (stale()) return;
+        const schema = await schemaPromise;
+        if (stale()) return;
+        // A readable GraphQL reply with fields is itself an open cross-origin read channel.
+        if (typeof schema.sha256 === 'string' && schema.fieldCount > 0) { corsLive = true; maybeRevealExposure(); }
+
+        const scored = candidates.map((build) => {
+          const { signals } = build;
+          const present = (signals.assetsPresent || []);
+          const absent = (signals.assetsAbsent || []);
+          const img = (signals.imagesPresent || []);
+          const presentOk = present.filter((p) => assets[p] === 'load').length;
+          const absentOk = absent.filter((p) => assets[p] === 'error').length;
+          const imgOk = img.filter((p) => images[p] === 'load').length;
+          const graphqlAgrees = !signals.graphqlQueryFieldsSha256 || schema.sha256 === signals.graphqlQueryFieldsSha256;
+          const graphqlReadable = typeof schema.sha256 === 'string';
+          const assetMatch = presentOk === present.length && absentOk === absent.length && imgOk === img.length;
+          return { build, assetMatch, graphqlAgrees, graphqlReadable,
+            presentOk, presentTotal: present.length, absentOk, absentTotal: absent.length };
+        });
+
+        // A content-hashed discriminator from the corpus loaded and the random-hash
+        // control did not: there is a GitLab at this address.
+        if (candidates.length && !stale()) gitlabRecognised = true;
+
+        const matches = scored.filter((s) => s.assetMatch && s.graphqlAgrees);
+        const matched = matches.length === 1 ? matches[0].build : null;
+        const range = matched?.versionRange || null;
+        // A patch released after the corpus was collected can share every probed asset
+        // with the newest collected build of its minor line, and would then match it.
+        // So when the match is the newest collected build of its edition and minor, a
+        // later patch of that minor stays a candidate (see setCatalogRange).
+        const minorOf = (v) => (versionParts(v) || []).slice(0, 2).join('.');
+        // Only the three newest minor lines get patch releases (GitLab's maintenance
+        // policy), so an older line's last collected patch really is its last.
+        const editionMinors = [...new Set(builds.filter((b) => b.edition === matched?.edition)
+          .map((b) => minorOf(b.versionRange?.max)))]
+          .sort((a, b) => compareVersions(`${b}.0`, `${a}.0`));
+        const laterPatchPossible = Boolean(matched && range) &&
+          editionMinors.slice(0, 3).includes(minorOf(range.max)) && !builds.some((b) =>
+          b.edition === matched.edition && minorOf(b.versionRange?.max) === minorOf(range.max) &&
+          compareVersions(b.versionRange.max, range.max) > 0);
+        const later = laterPatchPossible ? ` or a later ${minorOf(range.max)} patch` : '';
+        const label = matched
+          ? (range && range.min !== range.max
+              ? `GitLab ${range.min} to ${range.max}${later} (${matched.edition}, shared frontend build)`
+              : `GitLab ${range ? range.min : (matched.versions || []).join(', ')}${later} (${matched.edition})`)
+          : null;
+
+        render('fingerprint', matched ? 'ok' : 'blocked',
+          matched ? `Build identified: ${label}`
+            : matches.length ? `${matches.length} builds matched; ambiguous` : 'No bundled build signature matched', {
+            identifiedBuild: matched ? {
+              buildId: matched.buildId, edition: matched.edition, versions: matched.versions,
+              versionRange: matched.versionRange, confidence: matched.confidence
+            } : null,
+            interpretation: (matched
+              ? (range && range.min !== range.max
+                  ? `Asset hashes resolve to a frontend build shared by ${matched.versions.join(', ')}. The exact patch is indistinguishable without the authenticated /api/v4/version endpoint, so each CVE below is assessed against every one of those patches: VULNERABLE only if it is unpatched in all of them.`
+                  : 'Content-hashed asset set matches this collected build.')
+                + (laterPatchPossible ? ` This is the newest ${minorOf(range.max)} build in the corpus (collected ${String(database.generatedAt || '').slice(0, 10)}); a later ${minorOf(range.max)} patch released since then could serve the same assets, so it is kept as a candidate.` : '')
+              : 'No bundled build matched. The build may be newer than the corpus, customised, or not GitLab. Supply an approved token for the authoritative version, or extend the offline corpus.'),
+            remoteJavaScriptExecuted: false,
+            graphqlSchemaReadableCrossOrigin: typeof schema.sha256 === 'string',
+            probeSummary: {
+              buildsInCorpus: builds.length,
+              discriminatorsProbed: phase1Probes,
+              candidatesConfirmed: candidates.length,
+              confirmProbes: confirmPaths.length
+            },
+            anonymousGraphqlQuerySchema: schema,
+            databaseGeneratedAt: database.generatedAt
+          });
+
+        setStepState(2, 'done');
+        if (matched && range) {
+          setCatalogRange(range.min, range.max, matched.versions, matched.edition, laterPatchPossible);
+        } else {
+          // fingerprint ran but did not resolve: keep exposure locked unless a token set a version
+          if (catalogSource !== 'token') showLocked('No bundled build signature matched this instance. Supply an approved read-only token above for an authoritative version, and the exposure list will appear.');
+        }
+      } catch (error) {
+        if (stale()) return;
+        render('fingerprint', 'blocked', 'Fingerprint failed', String(error));
+        if (catalogSource !== 'token') showLocked('The fingerprint step could not complete, so there is no version to assess yet.');
+      }
+    }
+
+    let vulnerabilityCatalog = [];
+    let masterVulnerabilityCatalog = [];
+    let catalogVersion = null;
+    let catalogVersions = [];
+    let catalogRange = null;
+    let catalogSource = null;
+    let catalogEdition = null;
+    let catalogEditionFromApi = false;
+    let catalogLaterPatch = null; // 'X.Y' when an unseen later X.Y patch is a candidate
+    let catalogMetadata = null;
+    let vulnStatusById = new Map();
+
+    // @applicability-begin: loaded verbatim by tests/applicability.test.mjs
+    function versionParts(value) {
+      const match = String(value || '').match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
+      return match ? [Number(match[1]), Number(match[2] || 0), Number(match[3] || 0)] : null;
+    }
+    function compareVersions(left, right) {
+      const a = versionParts(left); const b = versionParts(right);
+      if (!a || !b) return null;
+      for (let index = 0; index < 3; index += 1) { if (a[index] !== b[index]) return a[index] < b[index] ? -1 : 1; }
+      return 0;
+    }
+    function cpeVersion(criteria) {
+      const value = String(criteria || '').split(':')[5];
+      return value && !['*', '-'].includes(value) ? value.replace(/\\([\\:*?!])/g, '$1') : null;
+    }
+    // GitLab's NVD records carry CE versus EE in the CPE 2.3 sw_edition field, which is
+    // colon segment 9: cpe:2.3:a:gitlab:gitlab:<version>:<update>:<edition>:<language>:
+    // <sw_edition>:... The legacy "edition" field (segment 7) is '*' in every GitLab
+    // record, so it cannot tell the editions apart.
+    function cpeEdition(criteria) { return String(criteria || '').split(':')[9] || '*'; }
+    const EDITIONS = ['community', 'enterprise'];
+    function normaliseEdition(value) { return EDITIONS.includes(value) ? value : null; }
+
+    // edition: 'community' | 'enterprise' for a known edition. Callers must not pass an
+    // unknown edition; vulnStatusFor evaluates both editions when it is unknown.
+    // A CE entry also applies to EE: EE is built on the full CE codebase, and NVD's EE
+    // ranges sometimes lag the CE ones for the same advisory (CVE-2022-2250 ends EE at
+    // 14.0.5 but CE at 14.10.5). An EE entry never applies to CE.
+    function editionCovers(entryEdition, edition) {
+      if (entryEdition === '*' || entryEdition === '-') return true;
+      if (entryEdition === edition) return true;
+      return entryEdition === 'community' && edition === 'enterprise';
+    }
+    function applicabilityMatches(entry, version, edition) {
+      if (entry.vulnerable === false) return false;
+      if (!editionCovers(cpeEdition(entry.criteria), edition)) return false;
+      const exact = cpeVersion(entry.criteria);
+      if (exact && compareVersions(version, exact) !== 0) return false;
+      const checks = [
+        ['versionStartIncluding', (c) => c >= 0],
+        ['versionStartExcluding', (c) => c > 0],
+        ['versionEndIncluding', (c) => c <= 0],
+        ['versionEndExcluding', (c) => c < 0],
+      ];
+      return checks.every(([field, accepts]) => {
+        if (!entry[field]) return true;
+        const comparison = compareVersions(version, entry[field]);
+        return comparison === null || accepts(comparison);
+      });
+    }
+    function appliesToVersion(item, version, edition) {
+      if (!version) return true;
+      const applicability = item.applicability || [];
+      return !applicability.length || applicability.some((entry) => applicabilityMatches(entry, version, edition));
+    }
+    // A CVE is definite only when it gives the same answer for every candidate patch AND
+    // every candidate edition. With the edition unknown, both editions are candidates, so
+    // a CE-only or EE-only CVE comes out indeterminate rather than guessed either way.
+    function vulnStatusFor(item, versions = catalogVersions, edition = catalogEdition) {
+      if (!versions.length) return { status: 'unknown', vuln: 0, total: 0 };
+      const total = versions.length;
+      const known = normaliseEdition(edition);
+      const counts = (known ? [known] : EDITIONS)
+        .map((ed) => versions.filter((v) => appliesToVersion(item, v, ed)).length);
+      const vuln = Math.max(...counts);
+      const editionDependent = new Set(counts).size > 1;
+      if (vuln === 0) return { status: 'fixed', vuln, total };
+      if (Math.min(...counts) === total) return { status: 'vulnerable', vuln, total };
+      return { status: 'indeterminate', vuln, total, editionDependent };
+    }
+    // @applicability-end
+    function recomputeCatalog() {
+      vulnStatusById = new Map();
+      if (!catalogVersions.length) { vulnerabilityCatalog = [...masterVulnerabilityCatalog]; return; }
+      vulnerabilityCatalog = masterVulnerabilityCatalog.filter((item) => {
+        const s = vulnStatusFor(item);
+        vulnStatusById.set(item.id, s);
+        return s.status !== 'fixed';
+      });
+    }
+
+    function countStates() {
+      let v = 0, i = 0;
+      for (const s of vulnStatusById.values()) { if (s.status === 'vulnerable') v++; else if (s.status === 'indeterminate') i++; }
+      return { v, i };
+    }
+    // Browser-reachable AND definitely vulnerable: an indeterminate CVE is not counted
+    // as reachable, and conditional paths are labelled as such in the table.
+    function countBrowserReachable() {
+      return vulnerabilityCatalog.filter((item) =>
+        isBrowserApiCompatible(item) && (vulnStatusById.get(item.id) || {}).status === 'vulnerable').length;
+    }
+    // The detected version span in words: "GitLab 18.11.12 to 18.11.14 or a later 18.11 patch".
+    function describeSpan() {
+      if (catalogSource === 'token' && catalogVersion) return `GitLab ${catalogVersion}`;
+      const base = catalogRange.min === catalogRange.max
+        ? `GitLab ${catalogRange.min}` : `GitLab ${catalogRange.min} to ${catalogRange.max}`;
+      return catalogLaterPatch ? `${base} or a later ${catalogLaterPatch} patch` : base;
+    }
+    const NVD_CAVEAT = 'Applicability comes from NVD CPE data, with corrections where it contradicts GitLab\'s own advisory (shown in the row tooltip).';
+
+    function updateVerdict() {
+      if (!catalogVersions.length) return;
+      const headline = document.querySelector('#verdict-headline');
+      const detail = document.querySelector('#verdict-detail');
+      const stats = document.querySelector('#verdict-stats');
+      const { v, i } = countStates();
+      const reach = countBrowserReachable();
+      const editionLabel = catalogEdition || 'edition unknown';
+      const realPatches = catalogVersions.length - (catalogLaterPatch ? 1 : 0);
+      if (catalogSource === 'token' && catalogVersion) {
+        detail.textContent = (catalogEdition
+          ? (catalogEditionFromApi
+              ? `Authoritative version and edition (${editionLabel}) from /api/v4/version`
+              : `Authoritative version from /api/v4/version, edition (${editionLabel}) from the fingerprint`)
+            + ', so every CVE is definite (fixed ones are hidden by default). '
+          : `Authoritative version from /api/v4/version, which did not report the edition, so CVEs that affect only EE are shown as indeterminate. `) + NVD_CAVEAT;
+      } else {
+        detail.textContent = (catalogRange.min === catalogRange.max
+          ? `Fingerprinted from content-hashed assets (${editionLabel}).`
+          : `Fingerprinted to a frontend build shared by ${realPatches} patch releases (${editionLabel}).`)
+          + (catalogLaterPatch ? ` A later ${catalogLaterPatch} patch released after the corpus was collected could serve the same assets, so it is counted as a candidate.` : '')
+          + ' Supply a read-only token above for the exact patch. ' + NVD_CAVEAT;
+      }
+      headline.innerHTML = `This instance is <span class="ver"></span>.`;
+      headline.querySelector('.ver').textContent = describeSpan();
+      stats.innerHTML = '';
+      const addStat = (n, k, cls) => {
+        const s = document.createElement('div'); s.className = 'stat';
+        const nn = document.createElement('div'); nn.className = 'n ' + (cls || ''); nn.textContent = n;
+        const kk = document.createElement('div'); kk.className = 'k'; kk.textContent = k;
+        s.append(nn, kk); stats.append(s);
+      };
+      addStat(v, 'definitely vulnerable', 'danger');
+      if (i) addStat(i, catalogEdition ? 'indeterminate (patch-dependent)' : 'indeterminate (patch- or edition-dependent)', 'warn');
+      addStat(reach, 'of those, with a browser path (likely or conditional, untested)', reach ? 'danger' : '');
+    }
+
+    function updateCatalogNote() {
+      if (!catalogMetadata) return;
+      let scope;
+      const { v, i } = countStates();
+      if (catalogSource === 'token' && catalogVersion) {
+        scope = `${describeSpan()} (authoritative /api/v4/version): ${v} definitely vulnerable` +
+          (i ? `, ${i} indeterminate because the edition (CE or EE) is unknown` : ', all definite');
+      } else if (catalogSource === 'fingerprint' && catalogRange) {
+        scope = `${describeSpan()}: ${v} definitely vulnerable` +
+          (i ? `, ${i} indeterminate (a fix lands on a candidate patch that cannot be told apart without the authenticated /api/v4/version). Use a token for the exact patch` : '');
+      } else {
+        scope = `${masterVulnerabilityCatalog.length} records in the GitLab 10.0.0-and-later master catalogue (no version detected)`;
+      }
+      const c = catalogMetadata.assessmentCoverage;
+      document.querySelector('#cve-note').textContent =
+        `${scope}. Browser-path assessments: ${c.manuallyReviewedRecords} manually reviewed, ` +
+        `${c.parallelAgentReviewedRecords || 0} agent-assisted reviews, ${c.unresolvedRecords} unresolved; none has been tested from a browser. ` +
+        `${c.applicabilityErrataRecords || 0} records carry an applicability correction from GitLab's advisory text. ` +
+        `${catalogMetadata.disclaimer} Generated ${catalogMetadata.generatedAt}.`;
+    }
+
+    function unlockExposure() {
+      hideStep('locked');
+      revealStep('step4');
+      setStepState(3, 'done');
+      setStepState(4, 'active');
+    }
+    function showLocked(message) {
+      hideStep('step4');
+      const locked = document.querySelector('#locked');
+      if (message) locked.querySelector('.locked-note').textContent = message;
+      locked.hidden = false;
+    }
+
+    // The fingerprint and CVE exposure (steps 3 and 4) are shown ONLY when the
+    // instance answers cross-origin reads, because that readable channel is what the
+    // drive-by attack depends on. Until CORS is confirmed live, reveal nothing; if
+    // it is confirmed blocked by a GitLab that answered, show the "API closed" panel instead.
+    function maybeRevealExposure() {
+      if (corsLive === true && catalogVersions.length) {
+        hideVerdictPanels();
+        revealStep('step3'); updateVerdict();
+        unlockExposure(); updateCatalogNote(); drawVulnerabilities();
+      }
+    }
+    function showCorsBlocked() {
+      hideStep('step3'); hideStep('step4'); hideStep('locked'); hideVerdictPanels();
+      revealStep('cors-blocked');
+      setStepState(2, 'done'); setStepState(3, ''); setStepState(4, '');
+    }
+
+    // Classify the target's address space as the browser's Local Network Access check
+    // would: LNA gates public -> private and anything -> loopback, never public -> public.
+    // Only IP literals can be classified client-side; a hostname's resolved address cannot.
+    function targetAddressClass(origin) {
+      let host;
+      try { host = new URL(origin).hostname; } catch { return 'unknown'; }
+      host = host.replace(/^\[|\]$/g, '').toLowerCase().replace(/\.$/, '');
+      if (host === 'localhost' || host.endsWith('.localhost')) return 'loopback';
+      if (host === '0.0.0.0' || host === '::') return 'loopback'; // Chrome treats the unspecified address as local
+      // IPv4-mapped IPv6 (the URL parser writes [::ffff:10.0.0.5] as [::ffff:a00:5]).
+      const mapped = host.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+      if (mapped) {
+        const hi = parseInt(mapped[1], 16), lo = parseInt(mapped[2], 16);
+        return targetAddressClass(`http://${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
+      }
+      const mappedDotted = host.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
+      if (mappedDotted) return targetAddressClass(`http://${mappedDotted[1]}`);
+      const v4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+      if (v4) {
+        const a = +v4[1], b = +v4[2];
+        if (a === 127) return 'loopback';
+        if (a === 10) return 'private';
+        if (a === 192 && b === 168) return 'private';
+        if (a === 172 && b >= 16 && b <= 31) return 'private';
+        if (a === 169 && b === 254) return 'private';          // link-local
+        if (a === 100 && b >= 64 && b <= 127) return 'cgnat';  // CGNAT, which Chrome treats as local
+        return 'public';
+      }
+      if (host.includes(':')) {
+        if (host === '::1') return 'loopback';
+        if (/^f[cd][0-9a-f]{2}:/.test(host)) return 'private'; // ULA fc00::/7
+        if (/^fe80:/.test(host)) return 'private';             // link-local
+        return 'public';
+      }
+      return 'unknown';
+    }
+
+    // Did ANYTHING answer at this address? An opaque no-cors fetch resolves when the host
+    // returns any HTTP response and rejects on DNS failure, refused or timed-out
+    // connections, a Local Network Access block, or mixed content (http from https).
+    async function hostAnswers(origin) {
+      try {
+        await fetch(`${origin}/favicon.ico`, { mode: 'no-cors', credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(PROBE_TIMEOUT_MS) });
+        return true;
+      } catch { return false; }
+    }
+    function hideVerdictPanels() {
+      for (const id of ['cors-blocked', 'lna-blocked', 'unreachable', 'inconclusive']) hideStep(id);
+    }
+    // Something answered, but nothing identified it as a GitLab with a readable API.
+    function showInconclusive(origin, readable = false) {
+      hideStep('step3'); hideStep('step4'); hideStep('locked'); hideVerdictPanels();
+      document.querySelector('#inconclusive-target').textContent = origin;
+      document.querySelector('#inconclusive-readable').hidden = !readable;
+      document.querySelector('#inconclusive-closed').hidden = readable;
+      const path = new URL(origin).pathname;
+      const hint = document.querySelector('#inconclusive-path');
+      hint.hidden = !path || path === '/';
+      if (!hint.hidden) {
+        document.querySelector('#inconclusive-path-value').textContent = path;
+        document.querySelector('#inconclusive-root').textContent = new URL(origin).origin;
+      }
+      revealStep('inconclusive');
+      setStepState(2, 'done'); setStepState(3, ''); setStepState(4, '');
+    }
+    // Nothing answered at all. Not a verdict on the target.
+    function showUnreachable(origin) {
+      hideStep('step3'); hideStep('step4'); hideStep('locked'); hideVerdictPanels();
+      document.querySelector('#unreachable-target').textContent = origin;
+      document.querySelector('#unreachable-http').hidden = !(location.protocol === 'https:' && origin.startsWith('http:'));
+      revealStep('unreachable');
+      setStepState(2, 'done'); setStepState(3, ''); setStepState(4, '');
+    }
+
+    // Best-effort read of the Local Network Access permission state, where the browser
+    // exposes it. 'granted' | 'denied' | 'prompt' | 'unknown'.
+    async function lnaPermissionState() {
+      if (!navigator.permissions || !navigator.permissions.query) return 'unknown';
+      for (const name of ['local-network', 'loopback-network', 'local-network-access']) {
+        try { const s = await navigator.permissions.query({ name }); if (s && s.state) return s.state; } catch (_) {}
+      }
+      return 'unknown';
+    }
+
+    // The browser blocked the probe (Local Network Access) rather than the TARGET
+    // refusing the read. This is NOT the "API closed" result; it is a browser-side
+    // control, so show its own panel instead of a false negative.
+    function showLnaBlocked(origin) {
+      hideStep('step3'); hideStep('step4'); hideStep('locked'); hideVerdictPanels();
+      const target = document.querySelector('#lna-target');
+      if (target) target.textContent = origin;
+      revealStep('lna-blocked');
+      setStepState(2, 'done'); setStepState(3, ''); setStepState(4, '');
+    }
+
+    // enterprise: the boolean /api/v4/version returns on GitLab versions that report it.
+    // When it is absent, any edition the fingerprint already found is kept.
+    function setCatalogVersion(version, enterprise) {
+      if (!versionParts(version) || compareVersions(version, '10.0.0') < 0) return;
+      catalogVersion = version; catalogVersions = [version];
+      catalogRange = { min: version, max: version }; catalogSource = 'token'; catalogLaterPatch = null;
+      if (typeof enterprise === 'boolean') { catalogEdition = enterprise ? 'enterprise' : 'community'; catalogEditionFromApi = true; }
+      recomputeCatalog();
+      maybeRevealExposure();
+    }
+    // laterPatch: the match is the newest collected build of its minor, so an unseen later
+    // patch of that minor is added as a candidate (X.Y.9999 sorts after every real patch
+    // of X.Y and before X.Y+1). A CVE fixed in such a patch then reads indeterminate
+    // instead of a false VULNERABLE.
+    function setCatalogRange(min, max, versions, edition, laterPatch = false) {
+      if (catalogSource === 'token') {
+        // The token already fixed the exact version. The fingerprint can still supply
+        // the edition when the API response did not carry one.
+        if (!catalogEdition && normaliseEdition(edition)) {
+          catalogEdition = normaliseEdition(edition); recomputeCatalog(); maybeRevealExposure();
+        }
+        return;
+      }
+      if (!versionParts(min) || compareVersions(min, '10.0.0') < 0) return;
+      catalogVersion = min;
+      catalogVersions = (versions && versions.length) ? versions.slice() : [min];
+      catalogRange = { min, max: max || min }; catalogSource = 'fingerprint';
+      catalogLaterPatch = laterPatch ? `${(versionParts(catalogRange.max) || []).slice(0, 2).join('.')}` : null;
+      if (catalogLaterPatch) catalogVersions.push(`${catalogLaterPatch}.9999`);
+      catalogEdition = normaliseEdition(edition);
+      recomputeCatalog();
+      maybeRevealExposure();
+    }
+
+    function addLink(container, label, url) {
+      const link = document.createElement('a');
+      link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = label;
+      container.append(link);
+    }
+    function isBrowserApiCompatible(item) {
+      return new Set(['confirmed-compatible', 'likely-compatible', 'conditional-compatible'])
+        .has(item.browserApiAssessment?.status);
+    }
+
+    function drawVulnerabilities() {
+      const query = document.querySelector('#cve-search').value.trim().toLowerCase();
+      const severity = document.querySelector('#cve-severity').value;
+      const remoteFilter = document.querySelector('#cve-remote').value;
+      const vulnFilter = document.querySelector('#cve-vuln').value;
+      const visible = vulnerabilityCatalog.filter((item) => {
+        const assessment = item.browserApiAssessment || {};
+        const vstatus = (vulnStatusById.get(item.id) || { status: 'unknown' }).status;
+        const vulnMatches = !vulnFilter || vstatus === vulnFilter;
+        const haystack = [
+          item.id, ...(item.weaknesses || []), assessment.rationale,
+          ...(assessment.prerequisites || []),
+          ...(item.vulnCheckXdb?.matches || []).flatMap((match) => [
+            match.repo, match.sourceReview?.triggerRoute, match.sourceReview?.finding]),
+        ].filter(Boolean).join(' ').toLowerCase();
+        const compatible = isBrowserApiCompatible(item);
+        if (browserOnly && !compatible) return false;
+        const remoteMatches = !remoteFilter ||
+          (remoteFilter === 'compatible' && compatible) || assessment.status === remoteFilter;
+        return (!query || haystack.includes(query)) &&
+          (!severity || item.cvss.severity === severity) && remoteMatches && vulnMatches;
+      }).sort((left, right) =>
+        Date.parse(right.published) - Date.parse(left.published) || left.id.localeCompare(right.id));
+
+      const list = document.querySelector('#cve-list');
+      list.replaceChildren();
+      for (const item of visible) {
+        const row = document.createElement('tr');
+        const published = document.createElement('td');
+        published.textContent = item.published.slice(0, 10);
+        const identifier = document.createElement('td');
+        const title = document.createElement('a');
+        title.href = item.links.nvd; title.target = '_blank'; title.rel = 'noopener noreferrer'; title.textContent = item.id;
+        identifier.append(title);
+        const score = document.createElement('td');
+        score.textContent = item.cvss.score ?? 'Unscored';
+        if (item.cvss.vector) score.title = item.cvss.vector;
+        const severityCell = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = `badge ${item.cvss.severity}`; badge.textContent = item.cvss.severity;
+        severityCell.append(badge);
+        const vulnCell = document.createElement('td');
+        const vs = vulnStatusById.get(item.id) || { status: 'unknown', vuln: 0, total: 0 };
+        if (vs.status === 'vulnerable') {
+          const b = document.createElement('span'); b.className = 'badge VULN'; b.textContent = 'VULNERABLE';
+          if (vs.total > 1) b.title = `Unpatched in all ${vs.total} candidate patches of the detected build`;
+          vulnCell.append(b);
+        } else if (vs.status === 'indeterminate') {
+          const b = document.createElement('span'); b.className = 'badge INDET';
+          if (vs.editionDependent) {
+            b.textContent = 'MAYBE (edition)';
+            b.title = 'Affects only one GitLab edition (CE or EE), and the edition of this instance could not be determined';
+          } else {
+            b.textContent = `MAYBE (${vs.vuln}/${vs.total})`;
+            b.title = `Vulnerable in ${vs.vuln} of the ${vs.total} candidate patches for this build; the exact patch is indistinguishable without the authenticated /api/v4/version`;
+          }
+          vulnCell.append(b);
+        } else {
+          vulnCell.textContent = vs.status === 'unknown' ? '–' : 'fixed';
+        }
+        const remoteCell = document.createElement('td');
+        const assessment = item.browserApiAssessment || { status: 'unresolved' };
+        const xdbReviews = (item.vulnCheckXdb?.matches || []).map((m) => m.sourceReview?.finding).filter(Boolean);
+        const reviewLabels = {
+          'manual-candidate-review': 'manual review',
+          'parallel-agent-review': 'agent-assisted review, not manually checked',
+          'structured-threat-model-exclusion': 'structured exclusion from CVSS and the advisory',
+        };
+        remoteCell.title = [
+          assessment.rationale || 'No assessment rationale available',
+          `Likelihood: ${assessment.likelihood || 'unrated'}`,
+          `Review: ${reviewLabels[assessment.reviewMode] || assessment.reviewMode || 'unknown'}. Not tested from a browser.`,
+          ...(assessment.evidenceNotes || []).filter((n) => /^Capped at/.test(n)),
+          ...xdbReviews.map((finding) => `XDB source review: ${finding}`),
+        ].join('\n');
+        if (item.errata) {
+          const note = ['Applicability corrected from GitLab\'s advisory:', ...item.errata.notes].join('\n');
+          vulnCell.title = note;
+          for (const badgeEl of vulnCell.querySelectorAll('.badge')) badgeEl.title = `${badgeEl.title}\n${note}`;
+        }
+        if (isBrowserApiCompatible(item)) {
+          const remote = document.createElement('span'); remote.className = 'remote';
+          const labels = {
+            'confirmed-compatible': 'BROWSER PATH: PUBLIC REPRO',
+            'likely-compatible': 'BROWSER PATH LIKELY',
+            'conditional-compatible': 'BROWSER PATH CONDITIONAL',
+          };
+          remote.textContent = `${labels[assessment.status]} (${assessment.likelihood || 'unrated'})`;
+          remote.title = remoteCell.title; remoteCell.append(remote);
+        } else {
+          const labels = { unresolved: 'Unresolved', 'outside-threat-model': 'Outside threat model' };
+          remoteCell.textContent = labels[assessment.status] || assessment.status;
+        }
+        const links = document.createElement('td'); links.className = 'links';
+        addLink(links, 'NVD', item.links.nvd);
+        addLink(links, 'CVE.org', item.links.cve);
+        if (item.vulnCheckXdb?.queryUrl) addLink(links, 'XDB', item.vulnCheckXdb.queryUrl);
+        for (const [index, url] of item.links.gitlab.entries()) addLink(links, `GitLab ${index + 1}`, url);
+        row.append(published, identifier, score, severityCell, vulnCell, remoteCell, links);
+        list.append(row);
+      }
+      const noun = catalogVersions.length ? 'applicable' : 'catalogue';
+      document.querySelector('#cve-status').textContent =
+        `Showing ${visible.length} of ${vulnerabilityCatalog.length} ${noun} CVEs` +
+        (browserOnly ? ' (drive-by browser-reachable only)' : '');
+    }
+
+    async function loadVulnerabilities(origin) {
+      try {
+        const catalog = await loadData('__CVES__', 'cves/gitlab-10.0.0-and-later.json');
+        if (origin !== gitlab) return;
+        catalogMetadata = catalog;
+        masterVulnerabilityCatalog = catalog.vulnerabilities;
+        recomputeCatalog();
+      } catch (error) {
+        const status = document.querySelector('#cve-status');
+        status.className = ''; status.textContent = `Could not load the CVE catalogue: ${error}`;
+      }
+    }
+
+    // Normalise a user-entered address to origin + path, or throw.
+    function parseOrigin(raw) {
+      const parsed = new URL(String(raw).trim());
+      if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Use an HTTP or HTTPS origin');
+      return `${parsed.origin}${parsed.pathname.replace(/\/$/, '')}`;
+    }
+    function safeOrigin(raw) { try { return parseOrigin(raw); } catch { return null; } }
+
+    // The one origin the user has confirmed may receive the token, or null.
+    let tokenConfirmedFor = null;
+    function updateTokenConfirm() {
+      const token = document.querySelector('#token').value.trim();
+      const origin = safeOrigin(document.querySelector('#gitlab-origin').value);
+      if (tokenConfirmedFor && tokenConfirmedFor !== origin) tokenConfirmedFor = null;
+      document.querySelector('#token-confirm-row').hidden = !(token && origin);
+      document.querySelector('#token-host').textContent = origin || '';
+      document.querySelector('#token-confirm').checked = Boolean(origin) && tokenConfirmedFor === origin;
+      document.querySelector('#token-http-warn').hidden =
+        !origin || origin.startsWith('https:') || targetAddressClass(origin) === 'loopback';
+    }
+
+    // Abandon any run in flight: late results are dropped because gitlab no longer
+    // matches the origin they were fetched for.
+    function cancelRun() {
+      runSeq += 1; gitlab = '';
+      resetBelowStep1();
+      const runBtn = document.querySelector('#run');
+      runBtn.disabled = false; runBtn.textContent = 'Run benign probes';
+    }
+
+    function resetBelowStep1() {
+      hideStep('step2'); hideStep('step3'); hideStep('step4');
+      hideVerdictPanels(); hideStep('locked');
+      setStepState(1, 'active'); setStepState(2, ''); setStepState(3, ''); setStepState(4, '');
+    }
+
+    async function run() {
+      const seq = ++runSeq;
+      const raw = document.querySelector('#gitlab-origin').value.trim();
+      lastRunInput = raw;
+
+      // Nothing is shown until an address is entered: no default, no auto-scan.
+      if (!raw) { resetBelowStep1(); return; }
+
+      let origin;
+      try {
+        origin = parseOrigin(raw);
+      } catch (error) {
+        revealStep('step2');
+        hideStep('step3'); hideStep('step4'); hideVerdictPanels(); hideStep('locked');
+        for (const name of ['projects', 'version', 'fingerprint']) render(name, 'blocked', 'Enter a valid GitLab origin', String(error));
+        return;
+      }
+      gitlab = origin;
+      // Bind the token to this run and this origin now. It goes only to an origin the
+      // user explicitly confirmed; otherwise the probes run anonymously.
+      const tokenValue = document.querySelector('#token').value.trim();
+      const token = tokenValue && tokenConfirmedFor === origin ? tokenValue : '';
+      corsLive = null; apiLooksGitlab = false;
+      catalogVersion = null; catalogVersions = []; catalogRange = null;
+      catalogSource = null; catalogEdition = null; catalogEditionFromApi = false; catalogLaterPatch = null; vulnStatusById = new Map();
+      gitlabRecognised = false;
+
+      // Step 2 appears as probing begins; step 3 only if CORS is live; step 4 when 3 resolves.
+      revealStep('step2');
+      hideStep('step3'); hideStep('step4'); hideVerdictPanels();
+      setStepState(1, 'done'); setStepState(2, 'active'); setStepState(3, ''); setStepState(4, '');
+      showLocked('Probing… the exposure appears here once the instance answers cross-origin and a version is fingerprinted.');
+
+      const runBtn = document.querySelector('#run');
+      runBtn.disabled = true; runBtn.textContent = 'Probing…';
+      render('projects', 'pending', 'Running', '');
+      render('version', 'pending', 'Running', '');
+      render('fingerprint', 'pending', 'Running', '');
+
+      try {
+        await loadVulnerabilities(origin);
+        if (seq !== runSeq) return;
+        // Prime the Local Network Access permission: run the first cross-origin read
+        // ALONE and await it. On recent Chromium a public page reaching a private or
+        // loopback address raises a permission prompt, and a fetch that triggers it waits
+        // for the user's decision. Doing this before the parallel swarm means a granted
+        // Allow is picked up on THIS run, instead of the first swarm racing the prompt,
+        // failing, and needing a manual refresh and re-run.
+        await getJson('projects', '/api/v4/projects?visibility=public&per_page=1', {}, origin);
+        if (seq !== runSeq) return;
+        await Promise.all([
+          getVersion(origin, token),
+          fingerprint(origin)
+        ]);
+        if (seq !== runSeq) return;
+        // All probes are in. If an /api read succeeded, CORS is live (already handled).
+        // If not, decide WHY before declaring anything: the TARGET refusing a cross-origin
+        // read (a CORS-policy block) is not the same as the browser refusing to SEND the
+        // request at all (a Local Network Access block). Reporting the latter as "not
+        // exposed" would be a false negative.
+        if (corsLive === true && !catalogVersions.length && !gitlabRecognised && !apiLooksGitlab) {
+          // Something answered with permissive CORS, but not like a GitLab, and no known
+          // build was recognised: say so rather than leave it looking like an exposed GitLab.
+          showInconclusive(origin, true);
+        } else if (corsLive !== true) {
+          // No readable /api response. Decide WHY before saying anything, and claim "not
+          // exposed" only with proof that a GitLab answered at this address.
+          if (gitlabRecognised) {
+            // A known GitLab asset loaded (and the random-hash control did not), so the
+            // requests reached a GitLab whose API refused the cross-origin read.
+            corsLive = false; showCorsBlocked();
+          } else {
+            const reachable = await hostAnswers(origin);
+            if (seq !== runSeq) return;
+            const addrClass = targetAddressClass(origin);
+            const lnaEligible = addrClass === 'private' || addrClass === 'loopback' || addrClass === 'cgnat';
+            const permState = await lnaPermissionState();
+            if (seq !== runSeq) return;
+            if (reachable) {
+              // Something answered, but no GitLab API was readable and no known GitLab build
+              // was recognised here: wrong path, not GitLab, or a build newer than the corpus.
+              showInconclusive(origin);
+            } else if ((lnaEligible || permState === 'denied') && permState !== 'granted') {
+              showLnaBlocked(origin);
+            } else {
+              showUnreachable(origin);
+            }
+          }
+        }
+      } finally {
+        if (seq === runSeq) { runBtn.disabled = false; runBtn.textContent = 'Re-run benign probes'; }
+      }
+    }
+
+    document.querySelector('#run').addEventListener('click', run);
+    document.querySelector('#lna-retry').addEventListener('click', run);
+    document.querySelector('#cve-search').addEventListener('input', drawVulnerabilities);
+    document.querySelector('#cve-severity').addEventListener('change', drawVulnerabilities);
+    document.querySelector('#cve-vuln').addEventListener('change', drawVulnerabilities);
+    document.querySelector('#cve-remote').addEventListener('change', drawVulnerabilities);
+    document.querySelector('#toggle-browser').addEventListener('click', (event) => {
+      browserOnly = !browserOnly;
+      const btn = event.currentTarget;
+      btn.setAttribute('aria-pressed', String(browserOnly));
+      btn.textContent = browserOnly ? 'Show all applicable CVEs' : 'Show only the drive-by browser-reachable subset';
+      btn.classList.toggle('secondary', !browserOnly);
+      drawVulnerabilities();
+    });
+    // Probing never starts while the address is being typed, so a half-typed host (a
+    // pause at "https://gitlab.co") is never contacted. Editing the address cancels any
+    // run in flight and clears the host confirmation (it is tied to the old origin).
+    // Pressing Enter runs the probes; leaving the field runs them too, but only when no
+    // token is entered. With a token, only Enter or the Run button starts a run.
+    let lastRunInput = null;
+    const runIfChanged = () => {
+      const value = document.querySelector('#gitlab-origin').value.trim();
+      if (value && value !== lastRunInput) run();
+    };
+    document.querySelector('#gitlab-origin').addEventListener('input', () => {
+      updateTokenConfirm();
+      lastRunInput = null;
+      cancelRun();
+    });
+    document.querySelector('#gitlab-origin').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') { event.preventDefault(); if (!document.querySelector('#run').disabled) run(); }
+    });
+    document.querySelector('#gitlab-origin').addEventListener('change', () => {
+      if (!document.querySelector('#token').value.trim()) runIfChanged();
+    });
+    document.querySelector('#token').addEventListener('input', () => {
+      updateTokenConfirm();
+    });
+    document.querySelector('#token-confirm').addEventListener('change', (event) => {
+      tokenConfirmedFor = event.currentTarget.checked
+        ? safeOrigin(document.querySelector('#gitlab-origin').value) : null;
+      updateTokenConfirm();
+    });
+    // No auto-run: the scan starts only once the user enters an address.
+  </script>
+</body>
+</html>

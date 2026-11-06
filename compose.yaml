@@ -1,0 +1,33 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:16.0.0-ce.0
+    platform: linux/amd64
+    container_name: gitlab-cors-lab
+    hostname: gitlab.test
+    restart: "no"
+    shm_size: 256m
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://127.0.0.1:8929'
+        nginx['listen_port'] = 80
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+        prometheus_monitoring['enable'] = false
+    ports:
+      - "127.0.0.1:8929:80"
+      - "127.0.0.1:2224:22"
+    volumes:
+      - gitlab-config:/etc/gitlab
+      - gitlab-logs:/var/log/gitlab
+      - gitlab-data:/var/opt/gitlab
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1/-/readiness"]
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 180s
+
+volumes:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
+

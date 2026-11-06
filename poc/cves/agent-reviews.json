@@ -1,0 +1,3716 @@
+{
+  "description": "Browser-path assessments made by agent-assisted primary-source review, not manual review and not browser reproduction. Merged back by scripts/apply-catalogue-fixes.mjs after enrich-browser-api.mjs.",
+  "reviews": {
+    "CVE-2026-97229": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/ci/lint",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "A crafted CI config (malicious include.rules.exists.regexp) must first be seeded into a project the attacker can write to (open sign-up, a stolen/valid token, or compromised account)",
+        "Vulnerable version 19.2-19.2.7 / 19.3-19.3.4 / 19.4-19.4.1"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "PoC lab (gandli) confirms the trigger is an unauthenticated GET to /api/v4/projects/:id/ci/lint which compiles the attacker-planted regex server-side (RCE), but planting that config requires write access to a public project, so the trigger is browser-sendable only once the content is seeded.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://github.com/gandli/cve-2026-97229-lab",
+        "https://www.ruby-lang.org/en/news/2026/10/23/regexp-fixes-for-gitlab-cves/"
+      ]
+    },
+    "CVE-2026-1168": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a crafted GraphQL query exploiting the complexity calculation"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab states an unauthenticated user can cause DoS via improper limits in the GraphQL complexity calculation; /api/graphql accepts anonymous POST queries and sends ACAO:* so a cross-origin page can fire the request (DoS needs only the send), though exact repro is not public.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/586586",
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-3-2-released/"
+      ]
+    },
+    "CVE-2025-14871": {
+      "status": "likely-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "crafted GraphQL query that defeats the complexity limiter"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Official advisory states an unauthenticated user can cause DoS via the GraphQL complexity calculation; /api/graphql is anonymously reachable and (per the model) CORS-enabled, so a hostile page can POST the query cross-origin, though the exact payload is in a private HackerOne report.",
+      "likelihood": "high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-3-2-released/",
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/584492"
+      ]
+    },
+    "CVE-2026-85706": {
+      "status": "confirmed-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/repository/commits (e.g. /api/v4/projects/1/repository/%63ommits?file=&file.path=/etc/passwd)",
+      "method": "form POST (application/x-www-form-urlencoded, empty body, params in query string)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "at least one public project (default PoC uses project id 1) or a known/enumerable project id",
+        "full file content only leaks for files containing a '%' not followed by two hex digits; otherwise the response is an existence oracle (401 vs 400)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Public PoCs (EQSTLab et al.) show a single unauthenticated POST to the /api/v4 repository commits API with a URL-encoded 'commits' that bypasses the Workhorse route check, reading arbitrary server files; /api/v4 returns ACAO:* so the 400/401 oracle (and reflected content) is readable cross-origin from a hostile page.",
+      "likelihood": "high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://github.com/EQSTLab/CVE-2026-85706",
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/627748"
+      ]
+    },
+    "CVE-2026-19478": {
+      "status": "confirmed-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json (or GET ?query=)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "the target public project's fullPath/id is known (public projects are enumerable)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "A public PoC sends an unauthenticated query to /api/graphql abusing the @gl_introduced version directive so an unknown field (e.g. 'destroy') falls through to a resolver-less fallback that calls Project#destroy; /api/graphql is CORS-readable (ACAO:*) with no auth and no user interaction, so a hostile page can send it and read the result.",
+      "likelihood": "high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://github.com/EQSTLab/CVE-2026-19478",
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-2-4-released/"
+      ]
+    },
+    "CVE-2026-12053": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "GitLab EE with Duo Workflows (licensed AI feature) enabled and in use by an authenticated user"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Insufficient output filtering in Duo Workflows leaks previously committed data to a user operating the Duo Workflow; it requires the licensed EE AI feature to be enabled and an authenticated user running a workflow, not reachable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-1-1-released/"
+      ]
+    },
+    "CVE-2026-1659": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": "crafted request (exact method not public)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "denial of service",
+      "prerequisites": [
+        "the triggering endpoint must be a GET, an /api route, or otherwise CSRF-exempt so a cross-origin page can send it (exact endpoint not public)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab states an unauthenticated user can cause DoS by sending specially crafted requests (CWE-770); DoS needs no readable response, but the exact endpoint is not public, so browser-reachability is conditional on it being a tokenless (GET/API/webhook) route rather than a CSRF-protected web POST.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/05/13/patch-release-gitlab-18-11-3-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-1659"
+      ]
+    },
+    "CVE-2025-14870": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/* (GitLab Duo Workflows API)",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "GitLab Duo Workflows feature must be enabled/configured on the instance"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab's advisory states an unauthenticated user can cause DoS by sending crafted JSON to the Duo Workflows API; a hostile page can send the body cross-origin (DoS needs no readable response, and raw-body JSON parsing can be reached via a simple text/plain POST), but it is gated on the Duo Workflows feature being enabled.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-18-11-3-released/",
+        "https://hackerone.com/reports/3446641"
+      ]
+    },
+    "CVE-2025-14869": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "certain /api/* endpoints (specific endpoints not disclosed)",
+      "method": "POST (crafted payload)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "crafted payload can be delivered as a simple/form request (no readable response needed for a DoS)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab states an unauthenticated user could cause denial of service by sending specially crafted payloads to certain API endpoints (CWE-1284, PR:N/UI:N); a DoS side-effect needs only a browser-sendable request, not a readable response, though the exact endpoints are not public.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/05/13/patch-release-gitlab-18-11-3-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2025-14869"
+      ]
+    },
+    "CVE-2026-1092": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql or other /api/* JSON endpoint",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": "unknown",
+      "impact": "denial of service",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab explicitly fixed an unauthenticated DoS from improper JSON-payload validation; the validation runs in middleware before auth, and GitLab /api (incl. /api/graphql) accepts anonymous cross-origin application/json POSTs under the model, so a hostile page can deliver the malformed JSON. Exact endpoint not public (work item/HackerOne private).",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/04/08/patch-release-gitlab-18-10-3-released/",
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/586479"
+      ]
+    },
+    "CVE-2026-3988": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a crafted GraphQL request triggering the algorithmic-complexity path"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Official summary says an unauthenticated user can make the instance unresponsive via improper input validation in GraphQL request processing (CWE-407); the anonymous /api/graphql endpoint is browser-sendable cross-origin and DoS fires on send.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/593140",
+        "https://about.gitlab.com/releases/2026/03/25/patch-release-gitlab-18-10-1-released/"
+      ]
+    },
+    "CVE-2026-1069": {
+      "status": "likely-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "crafted GraphQL request triggering uncontrolled recursion"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Official advisory states an unauthenticated user can DoS the instance with specially crafted GraphQL requests causing uncontrolled recursion; /api/graphql is anonymously reachable and CORS-enabled so a hostile page can POST it cross-origin; exact payload is in a private HackerOne report.",
+      "likelihood": "high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-18-9-2-released/",
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/586474"
+      ]
+    },
+    "CVE-2026-1662": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "Jira events endpoint (exact path not public)",
+      "method": "POST (webhook receiver)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "denial of service",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab states an unauthenticated user can cause DoS by sending crafted requests to the Jira events endpoint; such integration/webhook receivers are CSRF-exempt by design and need no readable response, so a cross-origin POST from a hostile page can plausibly reach and trigger it.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/02/25/patch-release-gitlab-18-9-1-released/",
+        "https://vulert.com/vuln-db/CVE-2026-1662"
+      ]
+    },
+    "CVE-2026-1388": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "a merge request endpoint (unspecified)",
+      "method": null,
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": false,
+      "impact": "denial of service",
+      "prerequisites": [
+        "A merge-request endpoint reachable anonymously (likely a public project)",
+        "The unspecified 'certain conditions' noted in the advisory",
+        "If the trigger is a non-/api POST it would need a CSRF token a hostile page cannot read"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab's advisory marks it unauthenticated (PR:N, UI:N) ReDoS via crafted input to a merge request endpoint 'under certain conditions', but the exact route/method is not public (issue 587560 is confidential), so browser-sendability depends on those conditions and whether the endpoint is a GET/API path.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-18-9-1-released/",
+        "https://hackerone.com/reports/3482893"
+      ]
+    },
+    "CVE-2025-14511": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/container_registry_event/events",
+      "method": "POST (crafted file/body)",
+      "authentication": "required (notification_secret) unless DoS occurs pre-auth during body parsing",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "denial of service",
+      "prerequisites": [
+        "the resource-exhaustion must occur during request/body parsing before the authenticate_registry_notification! secret check (the endpoint otherwise rejects requests lacking the configured Authorization secret)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab labels it unauthenticated DoS 'under certain conditions', but source code shows the container_registry_event endpoint is guarded by a before-filter comparing a configured notification_secret; it is only anonymously reachable if the crafted-file parsing consumes resources before that auth check.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/02/25/patch-release-gitlab-18-9-1-released/",
+        "https://sources.debian.org/src/gitlab/17.6.5-19/lib/api/container_registry_event.rb",
+        "https://nvd.nist.gov/vuln/detail/CVE-2025-14511"
+      ]
+    },
+    "CVE-2026-0958": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql or other /api/* JSON endpoint",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "An unauthenticated memory/CPU-exhaustion DoS from bypassing the JSON-validation middleware limits; being pre-auth middleware it triggers on any JSON body, and GitLab /api endpoints accept anonymous cross-origin application/json POSTs under the model, making it browser-deliverable. Precise endpoint not public (issue/HackerOne private).",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/02/10/patch-release-gitlab-18-8-4-released/",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/586202"
+      ]
+    },
+    "CVE-2026-0723": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "2FA/WebAuthn login verification flow",
+      "method": "POST (forged device response)",
+      "authentication": "required (mid-authentication, targeting a specific victim)",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "existing knowledge of the victim's credential ID",
+        "ability to drive the victim's in-progress 2FA login (AC:H)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Bypassing 2FA by submitting forged device responses requires prior knowledge of a specific victim's credential ID and participation in that victim's authentication flow (AC:H); it is a targeted auth-bypass, not an anonymous side-effect a hostile page can trigger against internal GitLab.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2026/01/21/patch-release-gitlab-18-8-2-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-0723"
+      ]
+    },
+    "CVE-2025-13928": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/* (unspecified endpoint)",
+      "method": "GET|POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "the specific API endpoint with the missing authorization check; possibly a known id"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab states an unauthenticated user can cause DoS via incorrect authorization validation in API endpoints; an authz gap that admits anonymous callers to an expensive /api operation is sendable cross-origin, though the exact endpoint is not disclosed.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/582736",
+        "https://about.gitlab.com/releases/2026/01/21/patch-release-gitlab-18-8-2-released/"
+      ]
+    },
+    "CVE-2025-13927": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/-/jira_connect/* (Jira Connect integration endpoint)",
+      "method": "GET/form POST with malformed jwt",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "denial of service",
+      "prerequisites": [
+        "request carrying malformed authentication (JWT) data to the Jira Connect endpoint"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Advisory describes an unauthenticated DoS in the Jira Connect integration via crafted requests with malformed authentication data; these endpoints are anonymous and CSRF-exempt and commonly accept a jwt query parameter, so a hostile page can send the trigger (response not needed for DoS); exact endpoint/payload is in a private HackerOne report.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-18-8-2-released/",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/582737"
+      ]
+    },
+    "CVE-2025-12571": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "the JSON endpoint must be /api (CORS/preflight allowed) or CSRF-exempt, otherwise a cross-origin application/json POST is blocked (exact endpoint not public)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab states an unauthenticated user can cause DoS via crafted malicious JSON payloads (CWE-770); DoS needs no readable response, but sending application/json cross-origin requires the endpoint to be /api or CSRF-exempt, which is unconfirmed, so reachability is conditional.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2025/11/26/patch-release-gitlab-18-6-1-released/",
+        "https://stack.watch/vuln/CVE-2025-12571"
+      ]
+    },
+    "CVE-2025-10497": {
+      "status": "conditional-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/-/collect_events",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Event-level data collection / event tracking must be enabled (Admin area > Metrics and profiling > Event tracking), which is non-default"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "HackerOne #3338151 (via GitLab issue 570336) shows an unauthenticated POST to /-/collect_events whose raw body is JSON-parsed with no size limit, exhausting memory; a hostile page can send the large body cross-origin (text/plain avoids preflight, DoS needs no response), gated only on event tracking being enabled.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/570336",
+        "https://about.gitlab.com/releases/2025/10/22/patch-release-gitlab-18-5-1-released/"
+      ]
+    },
+    "CVE-2025-10858": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "a feature accepting JSON file uploads (exact endpoint not disclosed)",
+      "method": "form POST (multipart file upload)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "denial of service",
+      "prerequisites": [
+        "the vulnerable JSON-upload endpoint is anonymously reachable (vendor states unauthenticated)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD/GitLab state unauthenticated users can cause DoS by uploading crafted large JSON files (CWE-770, PR:N/UI:N); a file-upload DoS is deliverable via a cross-origin form/multipart POST with no readable response required, but the specific endpoint is not public.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/570034",
+        "https://nvd.nist.gov/vuln/detail/CVE-2025-10858"
+      ]
+    },
+    "CVE-2025-0673": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/<namespace>/<project>?format=git",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a reachable project path on the target (public project, or any existing project URL)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Per the HackerOne reproduction, an unauthenticated plain GET to any project URL with ?format=git triggers redirect_git_extension to 302 back to the same URL in an endless loop; a hostile page can fire this simple cross-origin GET, but it needs a valid project path and the availability impact is low (browsers abort the loop).",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/514732",
+        "https://hackerone.com/reports/2936949"
+      ]
+    },
+    "CVE-2024-2878": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/repository/branches?search=...",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a reachable project whose branches are searchable anonymously (public project) with a known id"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "CVSS PR:N/UI:N and GitLab's record describe an unauthenticated DoS from crafted branch-name search terms; branch search on a public project is anonymously reachable via /api and the DoS fires regardless of response reading, conditioned on a known public project.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2024/05/08/patch-release-gitlab-16-11-2-released/",
+        "https://db.gcve.eu/vuln/cve-2024-2878"
+      ]
+    },
+    "CVE-2024-6323": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/search/count",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "global/advanced search reachable",
+        "private repo content inside a public project"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The public PoC (issue 457912) is a hit-count oracle against /search/count, a non-/api web route that sends no CORS headers, so the leaked count cannot be read cross-origin; the information-disclosure attack is unobservable to an anonymous hostile page under this model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/457912"
+      ]
+    },
+    "CVE-2024-2829": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a public project/repository that anonymous users can search via FileFinder (file/blob search)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "A crafted wildcard filter causes ReDoS in the server-side FileFinder used by repository file search; an unauthenticated user can hit it via a GET search request, but it requires a reachable public repository to search, so browser-reachability is conditional on anonymous search of a public project.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/451456",
+        "https://vulert.com/vuln-db/CVE-2024-2829"
+      ]
+    },
+    "CVE-2023-7028": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/users/password",
+      "method": "form POST",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The password-reset POST to /users/password is a Rails route protected by CSRF; the public PoCs first GET the reset page to scrape the authenticity_token, which a cross-origin hostile page cannot read (non-/api HTML route has no CORS), so the POST cannot be forged anonymously. The account-takeover also benefits the attacker directly server-to-server and gains nothing from a victim's browser.",
+      "likelihood": "low",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://github.com/Vozec/CVE-2023-7028",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/436084",
+        "https://hackerone.com/reports/2293343"
+      ]
+    },
+    "CVE-2023-6680": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Smartcard authentication (experimental) manually enabled by an administrator"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Per the advisory, Smartcard authentication is an experimental feature that must be manually enabled by an admin; the flaw is an improper-certificate-validation authentication bypass (attacker authenticates as another user using their public key), which is an auth attack benefiting the attacker's own session rather than an anonymous cross-origin browser trigger.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/421607"
+      ]
+    },
+    "CVE-2023-3994": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/groups/:group/preview_markdown (and other preview_markdown routes)",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "A valid CSRF token (csrf-token) plus a _gitlab_session, which the PoC obtained by first loading the page same-origin"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab issue 416225/H1 #1963255 show the ReDoS is triggered by a POST to preview_markdown requiring a CSRF token; preview_markdown is a non-/api route sending no CORS headers, so a cross-origin hostile page cannot read the token to forge the authenticity-token-protected POST.",
+      "likelihood": "low",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/416225",
+        "https://hackerone.com/reports/1963255"
+      ]
+    },
+    "CVE-2023-3364": {
+      "status": "likely-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "preview_markdown endpoint (markdown preview; also /api/v4/markdown shares the AutolinkFilter)",
+      "method": "form POST (text parameter with crafted autolink payload)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "if the targeted preview route enforces a CSRF/authenticity token, an anonymous cross-origin page cannot supply it (vendor nonetheless describes the attack as unauthenticated)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The GitLab issue states an attacker can take down the instance via unauthenticated requests carrying a crafted AutolinkFilter payload to the preview_markdown endpoint; a ReDoS DoS needs only a sendable request, though the reproduction used a session so clean anonymous CSRF-free reachability is not fully demonstrated.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/work_items/415995",
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-16-2-2-released/"
+      ]
+    },
+    "CVE-2023-3424": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/markdown (shared ReDoS filter also reached via preview_markdown)",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "GitLab version < 15.3, or the authenticate_markdown_api flag disabled, so /api/v4/markdown is anonymous (the web preview_markdown POST is CSRF-protected and not cross-origin forgeable)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The ReDoS lives in shared markdown reference/autolink filters; sibling reports confirm unauthenticated requests to the markdown-rendering path take down an instance. The anonymous cross-origin path is /api/v4/markdown (ACAO:*), but that endpoint only accepts anonymous requests before 15.3 / with the auth flag off; the web preview_markdown POST requires a CSRF token a hostile page cannot read.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://docs.gitlab.com/releases/patches/patch-release-gitlab-16-1-1-released/",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/415995",
+        "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/93727"
+      ]
+    },
+    "CVE-2023-2199": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/groups/:group/preview_markdown",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a valid X-CSRF-Token and _gitlab_session read from a same-origin page visit"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The issue 408272 repro posts JSON to the non-/api preview_markdown route carrying an X-CSRF-Token and session cookie copied from a same-origin page; a cross-origin hostile page cannot read that token from the non-CORS HTML page, and an application/json POST to a non-CORS route is preflight-blocked.",
+      "likelihood": "low",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/408272"
+      ]
+    },
+    "CVE-2023-2198": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:group/preview_markdown",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "valid anti-CSRF token tied to the victim session"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The documented ReDoS repro (issue 408273 / H1 1947187) posts to the web preview_markdown route which requires a matching X-CSRF-Token and session that a cross-origin page cannot read; a JSON POST to this non-/api route would also fail preflight. (The same regex may be reachable via unauthenticated /api/v4/markdown, but that is not documented for this CVE.)",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/408273"
+      ]
+    },
+    "CVE-2023-2132": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project/preview_markdown",
+      "method": "form POST",
+      "authentication": "none (account) but CSRF token required",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The DollarMathPostFilter ReDoS triggers in the preview_markdown web (non-/api) controller action, which runs only after Rails CSRF validation; a cross-origin hostile page cannot read the page to obtain the anti-CSRF token, so the POST is rejected before the vulnerable filter runs.",
+      "likelihood": "low",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/407586",
+        "https://vulert.com/vuln-db/CVE-2023-2132"
+      ]
+    },
+    "CVE-2023-2825": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/<group>/.../<project>/uploads/<hash>/<filename>",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an attachment exists in a public project nested within at least five groups",
+        "GitLab exactly at 16.0.0"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab issue 412371/PoC show an anonymous GET on the non-/api uploads route reading arbitrary files, but that route sends no CORS headers so a hostile page cannot read the leaked file contents; the request can be sent but the infoleak yields nothing cross-origin.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/412371",
+        "https://github.com/cc3305/CVE-2023-2825"
+      ]
+    },
+    "CVE-2018-17455": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "merge request approvals endpoint (unspecified)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "The disclosing endpoint must be an /api/* route for the leaked JSON to be readable cross-origin",
+        "Knowledge of a valid group/object id to reference (IDOR key)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD/Ubuntu score it PR:N (unauthenticated) IDOR leaking group names/avatars/LDAP settings via a user-controlled id, but the exact route is unconfirmed (advisory no longer retrievable); the disclosure is only browser-usable if that endpoint is under /api (CORS-readable), otherwise the response cannot be read cross-origin.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2018-17455",
+        "https://dbugs.ptsecurity.com/pt/vulnerability/PT-2023-2596"
+      ]
+    },
+    "CVE-2018-17452": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated access to configure a URL-fetching feature (webhook/import/integration)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "SSRF via the url_blocker loopback bypass is reached through GitLab features that fetch an attacker-supplied URL (webhooks, project import by URL, integrations), all of which require an authenticated session to configure; an anonymous cross-origin page cannot set these.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2018/10/01/security-release-gitlab-11-dot-3-dot-1-released/"
+      ]
+    },
+    "CVE-2018-17449": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "events API (e.g. /api/v4/events or project events)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a known/enumerable object id to reference (IDOR key)",
+        "the events API is anonymously reachable (uncertain; the GitLab events API normally requires a token)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD describes an unauthenticated (PR:N) IDOR in the events API leaking issue/comment/project titles; if the /api events route is anonymously reachable its response is readable cross-origin, but exploitation depends on referencing a known id and the endpoint may in fact require authentication.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2018/10/01/security-release-gitlab-11-dot-3-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-17449"
+      ]
+    },
+    "CVE-2018-15472": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated access to create a diff (push/merge request)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The rouge diff-formatter blocking occurs in a Sidekiq background job triggered by processing a diff, which requires authenticated repository/MR activity; it is a server-side/async condition not reachable by an anonymous cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2018/10/01/security-release-gitlab-11-dot-3-dot-1-released/"
+      ]
+    },
+    "CVE-2022-3283": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an authenticated user with access to clone an issue containing crafted description content"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The high-CPU DoS is triggered by cloning an issue with crafted description content, an authenticated in-app action; it is not reachable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2022/CVE-2022-3283.json",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/361982"
+      ]
+    },
+    "CVE-2022-2931": {
+      "status": "likely-compatible",
+      "confidence": "medium-high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/markdown",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "crafted markdown content that drives high CPU during reference rendering"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Issue 361982 explicitly notes the high-CPU DoS is reachable via 'unauthenticated requests to the markdown preview API /api/v4/markdown' (~60s CPU); /api/v4/markdown is anonymous and CORS-enabled, so a hostile page can POST the crafted content cross-origin (response not needed for DoS).",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/361982"
+      ]
+    },
+    "CVE-2022-2229": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/... (CI variable, exact route not public)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a public project",
+        "attacker knows the exact (unprotected) variable name",
+        "the extraction endpoint is anonymously readable via /api"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Improper authorization lets the value of a known unprotected CI variable be read in public projects (PR:N); if the extraction endpoint is under /api it is CORS-readable cross-origin, but this depends on a public project, prior knowledge of the variable name and anonymous access, so it is conditional.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2022/CVE-2022-2229.json",
+        "https://nvd.nist.gov/vuln/detail/CVE-2022-2229"
+      ]
+    },
+    "CVE-2022-1162": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/users/sign_in",
+      "method": "form POST",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "A victim account was created via an OmniAuth provider (OAuth/LDAP/SAML)",
+        "Attacker logs in directly with the hardcoded password"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Exploitation is a direct credential login to a victim account using a static password; it is an authentication action performed by the attacker, not a cross-origin trigger a hostile page issues against an internal GitLab, and the login form requires a CSRF token.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/357210",
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2022/CVE-2022-1162.json"
+      ]
+    },
+    "CVE-2022-0735": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project/notes",
+      "method": "form POST",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "attacker has a GitLab account",
+        "attacker can create a project and an issue",
+        "post a comment containing the /move quick action"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Primary issue 353529 shows the runner-token leak is triggered by posting a /move quick action in an issue comment (POST to .../notes), which requires an authenticated user and a CSRF token; not reachable by an anonymous cross-origin page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/353529"
+      ]
+    },
+    "CVE-2022-0244": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/groups/new (group import)",
+      "method": "form POST",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "Authenticated user able to create/import a group with a crafted import archive"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Arbitrary file read occurs during authenticated group import of a crafted archive; it requires a logged-in user with group-creation rights and a multi-step upload, not an anonymous hostile-page request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/349524",
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2022/CVE-2022-0244.json"
+      ]
+    },
+    "CVE-2021-22215": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/* (incident management / on-call schedules)",
+      "method": "GET",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "Attacker must be a project owner (privileged role)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Disclosure of other projects' on-call rotations requires the attacker to hold a project owner role, so it is not reachable by an anonymous, unauthenticated hostile page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/328668",
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2021/CVE-2021-22215.json"
+      ]
+    },
+    "CVE-2021-22209": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST (GraphQL mutation)",
+      "authentication": "required (relies on victim's authenticated session)",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a logged-in victim whose session the forged mutation rides (CSRF-style)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The impact profile (C:N/I:H/A:N, improper authorization of the CSRF/authenticity token so a GraphQL mutation executes) is a classic write-only CSRF that depends on the victim's authenticated session; this model assumes no GitLab login, so it is excluded.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/327155",
+        "https://cve.circl.lu/cve/CVE-2021-22209"
+      ]
+    },
+    "CVE-2021-22205": {
+      "status": "confirmed-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/uploads/user",
+      "method": "form POST multipart/form-data",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The ExifTool command injection fires inside GitLab Workhorse while parsing the multipart upload at POST /uploads/user, which runs in a PreAuthorizeHandler context BEFORE Rails authentication/CSRF (per AttackerKB and the PoC), so a cross-origin fetch posting a malicious DjVu blob as multipart/form-data triggers RCE even though the later Rails response is rejected/unreadable.",
+      "likelihood": "high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/327121",
+        "https://raw.githubusercontent.com/Al1ex/CVE-2021-22205/main/CVE-2021-22205.py",
+        "https://attackerkb.com/topics/cve-2021-22205"
+      ]
+    },
+    "CVE-2021-22203": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated write access to create/edit a wiki page"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Arbitrary file read requires a specially crafted Wiki page, i.e. wiki write access (authenticated, typically Developer+); the file read then happens server-side on rendering, and the CVSS AC:H reflects the crafted-content requirement, placing it outside the anonymous hostile-page model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/320919",
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2021/CVE-2021-22203.json"
+      ]
+    },
+    "CVE-2020-13356": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "file upload endpoint handled via GitLab-Workhorse multipart (exact route not public)",
+      "method": "form POST (multipart/form-data, crafted)",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "the vulnerable upload route is anonymously reachable",
+        "the server reflects/returns file content so it can be read cross-origin (only possible if the route is under /api); otherwise exfiltration fails"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Vendor/NVD describe an unauthenticated (PR:N) crafted request that bypasses Workhorse multipart protection to read files in specific paths, but the HackerOne report and CVE JSON are not public, so whether the leaking response is readable cross-origin cannot be confirmed.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/230878",
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-13356"
+      ]
+    },
+    "CVE-2020-13298": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated ability to upload a Conan package"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The limited file disclosure is in Conan package upload functionality, which requires an authenticated package-publish credential; not reachable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2020/CVE-2020-13298.json",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/228841"
+      ]
+    },
+    "CVE-2020-13274": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated ability to upload CI artifacts (job token / user)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Memory-exhaustion DoS requires uploading malicious artifacts, which needs an authenticated CI/job credential; not anonymously browser-reachable.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/cves/-/blob/master/2020/CVE-2020-13274.json",
+        "https://gitlab.com/gitlab-org/gitlab/-/issues/14195"
+      ]
+    },
+    "CVE-2020-13273": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The CVE JSON and NVD describe only a generic resource-exhaustion DoS with no component/route, and the linked issue 207349 is confidential (404); there is insufficient public evidence to determine a browser-sendable anonymous trigger.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/cves/-/raw/master/2020/CVE-2020-13273.json",
+        "https://jamesbrine.com.au/cve-2020-13273-information/"
+      ]
+    },
+    "CVE-2020-11506": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": "HTTP request smuggling",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "byte-level control of the raw HTTP request, which browsers do not permit"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The Workhorse bypass relies on HTTP request smuggling, which requires crafting ambiguous raw request framing; browsers normalise outgoing requests and cannot produce smuggled payloads, so a hostile web page cannot trigger it.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/04/14/critical-security-release-gitlab-12-dot-9-dot-3-released/"
+      ]
+    },
+    "CVE-2020-11505": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "NuGet package endpoints via Workhorse",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Ability to craft smuggled/ambiguous raw HTTP requests (HTTP request smuggling)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The Workhorse bypass relies on HTTP request smuggling, which needs byte-level control of raw requests/headers that browsers normalize and cannot produce; not reachable from a hostile web page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/04/14/critical-security-release-gitlab-12-dot-9-dot-3-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-11505"
+      ]
+    },
+    "CVE-2020-10980": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "privilege to configure the FogBugz project integration (maintainer/admin)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Blind SSRF lives in the FogBugz integration, which only a project maintainer/admin can configure; it is not reachable by an anonymous cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/03/26/security-release-12-dot-9-dot-1-released/"
+      ]
+    },
+    "CVE-2020-10976": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "merge request widget .json route (non-/api)",
+      "method": "GET",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user with some project access who should not see the leaked field"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Information leakage via the merge request widget is an under-privileged-disclosure bug on a non-/api project .json route that is not CORS-readable cross-origin and requires project access; neither the auth context nor a readable response is available to an anonymous page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/03/26/security-release-12-dot-9-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-10976"
+      ]
+    },
+    "CVE-2020-10956": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user able to run a project import with the import-note feature"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The SSRF is server-side in the project-import note feature; triggering an import requires an authenticated user, and the SSRF effect is not observable by a browser, so it falls outside the anonymous hostile-page model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://vulert.com/vuln-db/CVE-2020-10956",
+        "https://about.gitlab.com/releases/2020/03/26/security-release-12-dot-9-dot-1-released/"
+      ]
+    },
+    "CVE-2020-10954": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/<namespace>/<project>/-/archive/<ref>.<format>",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a reachable public project whose repository archive can be downloaded anonymously"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The DoS is in repository archive download, an anonymous GET for public projects; a hostile page can fire many simple cross-origin GETs to the archive route to drive server resource consumption, but it requires a public project to exist and the exact trigger (format/ref) is not confirmed by a reachable primary source.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://vulnerability.circl.lu/vuln/cve-2020-10954",
+        "https://about.gitlab.com/releases/2020/03/26/security-release-12-dot-9-dot-1-released/"
+      ]
+    },
+    "CVE-2020-10953": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/packages/npm/... (traversal in package path)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "GitLab EE with the NPM package registry feature enabled",
+        "anonymous/public package read enabled on a known project"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "CWE-22 path traversal in the EE NPM package feature (PR:N) lives under /api, which is CORS-readable, so an anonymous cross-origin GET could both trigger and read the leaked file, conditioned on the NPM feature being enabled and anonymously accessible.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2020-10953",
+        "https://about.gitlab.com/releases/2020/03/26/security-release-12-dot-9-dot-1-released/"
+      ]
+    },
+    "CVE-2020-10077": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a deprecated integration/service must be configured, which requires an authenticated privileged user"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Server-side SSRF via a deprecated service; exploitation depends on configuring that service (an authenticated action) and the response is not returned to a cross-origin page, so an anonymous hostile page cannot establish the trigger.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/03/04/gitlab-12-dot-8-dot-2-released/"
+      ]
+    },
+    "CVE-2020-10074": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "Possession/use of a specific expired account link (e.g. invitation/confirmation token) in a particular scenario"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Account takeover depends on abusing a specific expired link in a particular flow rather than a generic cross-origin request a hostile page could issue anonymously; primary GitLab post was not individually retrievable (redirects to index).",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://nvd.nist.gov/vuln/detail/cve-2020-10074",
+        "https://about.gitlab.com/releases/2020/03/04/gitlab-12-dot-8-dot-2-released/"
+      ]
+    },
+    "CVE-2020-10073": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project (project home page)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a reachable project whose permission-check path on its home page is expensive",
+        "repeated/automated requests to exhaust resources"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Advisory (EE) says a DoS 'involving permissions checks could impact a project home page' with PR:N; an anonymous GET of a reachable project home page is a browser-sendable side-effect (DoS needs no readable response), but no detail confirms the exact triggering condition, so it is conditional.",
+      "likelihood": "low",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://vulnerability.circl.lu/vuln/CVE-2020-10073",
+        "https://about.gitlab.com/releases/2020/03/04/gitlab-12-dot-8-dot-2-released/"
+      ]
+    },
+    "CVE-2020-10089": {
+      "status": "outside-threat-model",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "multiple GitLab features must be configured to reference each other recursively, which requires authenticated setup"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The DoS arises from several features recursively requesting each other; establishing that recursive configuration requires authenticated actions, and no primary source indicates an anonymous cross-origin trigger.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/03/04/gitlab-12-dot-8-dot-2-released/"
+      ]
+    },
+    "CVE-2020-10087": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "project/group badge image rendering",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": true,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "A victim loads a page containing an unproxied external badge image"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The flaw is that badge images were not proxied, leaking the viewing user's IP to third parties and causing mixed content; it affects the victim's outbound request, not a vulnerability a hostile page triggers against the internal GitLab.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-10087",
+        "https://about.gitlab.com/releases/2020/03/04/gitlab-12-dot-8-dot-2-released/"
+      ]
+    },
+    "CVE-2020-10083": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "group/project membership changes (server-side state)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "This is a server-side authorization-state bug where project authorization changes were not applied on certain group operations; there is no network request a hostile anonymous page can send to trigger or benefit from it.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/03/04/gitlab-12-dot-8-dot-2-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-10083"
+      ]
+    },
+    "CVE-2019-13121": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user able to configure the GitHub project integration"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "SSRF in the GitHub project integration is triggered server-side after an authenticated user configures the integration endpoint; an anonymous hostile page cannot set it up or read the server-side response.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/07/03/security-release-gitlab-12-dot-0-dot-3-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-13121"
+      ]
+    },
+    "CVE-2019-13003": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated access to submit CI configuration (push/pipeline)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The resource-exhaustion is in a GitLab CI parser, reached by submitting a crafted .gitlab-ci.yml / pipeline, which requires authenticated repository access; it is not an anonymous cross-origin browser-triggerable request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/07/03/security-release-gitlab-12-dot-0-dot-3-released/"
+      ]
+    },
+    "CVE-2019-12446": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Only CWE-209 (information exposure through an error message) and PR:N are documented; the GitLab 11.11.1 advisory and third-party records name no route or mechanism, so whether a hostile page could read the error output cross-origin cannot be established.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2019-12446?format=md",
+        "https://about.gitlab.com/releases/2019/06/03/security-release-gitlab-11-dot-11-dot-1-released/"
+      ]
+    },
+    "CVE-2019-12443": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user able to configure a URL-consuming feature (webhook, integration, import)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The DNS-rebinding SSRF affects URL-consuming features (integrations/imports/webhooks) that require an authenticated user to enter a target URL; the forged request originates server-side, so an unauthenticated browser page cannot reach or configure it.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/06/03/security-release-gitlab-11-dot-11-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-12443"
+      ]
+    },
+    "CVE-2019-12441": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user with push access attempting to bypass protected-branch rules"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The protected-branches bypass is an access-control issue exercised by an authenticated user performing git/push operations; it is not reachable by an anonymous cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/06/03/security-release-gitlab-11-dot-11-dot-1-released/"
+      ]
+    },
+    "CVE-2019-12428": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "mandatory external-auth provider configured on the instance"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "This is a sign-in-restriction bypass that grants the attacker their own authenticated session; it produces no cross-origin-readable data or useful side-effect in a victim's browser and depends on a specific external-auth configuration being enabled.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/06/03/security-release-gitlab-11-dot-11-dot-1-released/"
+      ]
+    },
+    "CVE-2020-8113": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a valid deploy token with read_repository scope"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Issue 31599 shows the flaw is a read_repository deploy token wrongly being accepted by the Docker registry (via docker login); it requires a valid credential and a non-browser registry transport.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/issues/31599"
+      ]
+    },
+    "CVE-2020-8795": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an authenticated user performing group-with-group sharing"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The flaw is that sharing a group with a group grants project access to unauthorized users; it requires an authenticated group owner/maintainer to perform the share, so it is not reachable by an anonymous hostile page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/02/13/critical-security-release-gitlab-12-dot-7-dot-6-released/"
+      ]
+    },
+    "CVE-2020-6833": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "package/file endpoints via Workhorse",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Ability to craft smuggled/ambiguous raw HTTP requests (HTTP request smuggling)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Another Workhorse bypass via HTTP request smuggling, requiring raw-request control browsers cannot produce; not reachable from a hostile web page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/01/30/security-release-gitlab-12-7-4-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-6833"
+      ]
+    },
+    "CVE-2020-7978": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Only a generic GitLab releases blog is referenced and NVD gives no detail beyond 'allows Denial of Service' in GitLab EE; the affected route and auth requirement cannot be established from primary sources.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/01/30/security-release-gitlab-12-7-4-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2020-7978"
+      ]
+    },
+    "CVE-2020-7972": {
+      "status": "outside-threat-model",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The EE 'Insecure Permissions' integrity issue (I:H) has no public endpoint detail (advisory redirects to a generic index); permission-abuse flaws of this class require an authenticated actor to perform the unauthorized action, so no anonymous cross-origin browser trigger is supported by the evidence.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/01/30/security-release-gitlab-12-7-4-released/"
+      ]
+    },
+    "CVE-2020-7969": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The record only states a generic EE information disclosure (C:H, PR:N); the 12.7.4 release note redirects away and no source names the affected component or route, so browser-reachability and response readability cannot be determined.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://vulnerability.circl.lu/vuln/cve-2020-7969",
+        "https://about.gitlab.com/releases/2020/01/30/security-release-gitlab-12-7-4-released/"
+      ]
+    },
+    "CVE-2020-7968": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD gives only 'Incorrect Access Control' (CWE-862, C:H) with no route/mechanism, and the linked 12.7.4 advisory now redirects to a landing page; there is insufficient public evidence to determine whether an anonymous cross-origin request can read the disclosed data.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/01/30/security-release-gitlab-12-7-4-released/",
+        "https://osv.dev/vulnerability/CVE-2020-7968"
+      ]
+    },
+    "CVE-2020-7966": {
+      "status": "outside-threat-model",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "an EE-only feature (not specified in public sources) reachable only by an authenticated user"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Only a generic EE directory-traversal (CWE-22, confidentiality) description is public; EE-specific file-read vulnerabilities of this era sit in authenticated/admin features and no primary source indicates an anonymous cross-origin, response-readable trigger.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2020/01/30/security-release-gitlab-12-7-4-released/",
+        "https://ubuntu.com/security/CVE-2020-7966"
+      ]
+    },
+    "CVE-2020-8114": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "user who had (or had been removed from) project access repeatedly scheduling project exports"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Linked issue 37468 describes ProjectExportWorker not re-checking user permissions so a blocked/removed user keeps triggering exports; it requires a previously-authorized authenticated user, not an anonymous browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/issues/37468",
+        "https://ubuntu.com/security/CVE-2020-8114"
+      ]
+    },
+    "CVE-2019-5472": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "epic notes/comments endpoint (EE)",
+      "method": "form POST",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "EE Epics feature",
+        "Attacker must hold owner/maintainer role"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The authorization flaw concerns owners/maintainers' ability to delete epic comments; it requires a privileged authenticated role and the EE epics feature, not an anonymous hostile-page request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ee/issues/11381",
+        "https://hackerone.com/reports/538101"
+      ]
+    },
+    "CVE-2019-5470": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "security dashboard (EE)",
+      "method": "GET",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user with access to the EE security dashboard/project"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Disclosure of vulnerability feedback via the EE security dashboard requires an authenticated user with dashboard access; it is not an anonymously reachable, cross-origin-readable endpoint.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/07/29/security-release-gitlab-12-dot-1-dot-2-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-5470"
+      ]
+    },
+    "CVE-2019-5464": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a feature that uses url_blocker.rb (webhooks/imports) must be reachable, which normally requires authentication"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "This is a DNS-rebinding weakness in the url_blocker library itself; it is only exploitable 'where the library is utilized', i.e. through webhook/import features that require an authenticated user to supply a URL, so it is not reachable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/63959",
+        "https://about.gitlab.com/releases/2019/07/29/security-release-gitlab-12-dot-1-dot-2-released/"
+      ]
+    },
+    "CVE-2019-15590": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Elasticsearch integration enabled (EE)",
+        "authenticated user performing Group Search"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Private MR/issue disclosure occurs via the Group Search feature backed by Elasticsearch, which both requires the ES integration to be enabled and an authenticated search request; it is not reachable by an anonymous cross-origin page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/releases/2019/10/07/security-release-gitlab-12-dot-3-dot-5-released/",
+        "https://hackerone.com/reports/701144"
+      ]
+    },
+    "CVE-2019-15585": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/users/auth/saml/callback",
+      "method": "form POST",
+      "authentication": "none",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "SAML SSO must be configured on the instance",
+        "Attacker must craft/forge a SAML assertion and drive the login flow"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "SAML account takeover requires a configured SAML integration and manipulation of the SAML authentication assertion/login flow, not an anonymous cross-origin request a hostile page can supply.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-15585",
+        "https://hackerone.com/reports/471323"
+      ]
+    },
+    "CVE-2019-15583": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/issues (and labels)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "an issue was moved from a private project to a public one, leaving the private labels/namespace attached"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Per the summary the private labels and private project namespace are exposed through the GitLab API after an issue is moved to a public project; the /api route is anonymously CORS-readable, so the disclosure is browser-readable given the seeded moved-issue condition.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/blog/2019/09/30/security-release-gitlab-12-dot-3-dot-2-released/"
+      ]
+    },
+    "CVE-2019-19629": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/groups/:id/search (Group Search API, Elasticsearch)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "EE with the Elasticsearch/advanced-search integration enabled",
+        "a public project that was transferred into a private group",
+        "known target group id"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Advisory (CVSS PR:N) says private code is disclosed via the Elasticsearch Group Search API after a public-to-private transfer; if the /api group search is anonymously readable the leak is browser-reachable, but it is gated on the non-default Elasticsearch integration and the specific transfer scenario, and anonymous (vs low-privilege) access is not firmly established.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2019-19629?format=md",
+        "https://about.gitlab.com/blog/2019/12/10/critical-security-release-gitlab-12-5-4-released/"
+      ]
+    },
+    "CVE-2019-19628": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated access to publish to the Maven package registry (job token or PAT)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Path-traversal/priv-esc/RCE via the Maven package registry requires authenticated interaction with the package registry to upload crafted package metadata; not reachable by an unauthenticated cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/blog/2019/12/10/critical-security-release-gitlab-12-5-4-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-19628"
+      ]
+    },
+    "CVE-2019-19314": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "n/a",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "This is a data-at-rest issue (several tokens stored in plaintext); there is no HTTP request a browser can send to trigger it, so it falls entirely outside the hostile-page network threat model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/issues/32381",
+        "https://about.gitlab.com/blog/2019/11/27/security-release-gitlab-12-5-1-released/"
+      ]
+    },
+    "CVE-2019-19313": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "issue/commit creation and rendering",
+      "method": "form POST",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Authenticated ability to create/edit an issue or commit containing the triggering characters"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The DoS arises from certain characters that break creating/editing/viewing issues and commits; triggering it requires authenticated injection of that content (CSRF-protected writes), not an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab/issues/14947",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-19313"
+      ]
+    },
+    "CVE-2019-19088": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The GitLab primary issue is inaccessible and public mirrors (NVD/Ubuntu/CIRCL) give no endpoint, method or authentication mechanics for this EE directory traversal, so a browser-sendable anonymous trigger cannot be established; file-read traversals typically sit behind authenticated or non-/api routes whose responses are not cross-origin readable.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2019-19088",
+        "https://vulnerability.circl.lu/vuln/CVE-2019-19088"
+      ]
+    },
+    "CVE-2018-20499": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user running a project import of an LFS-enabled project"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Issue 55439 shows the SSRF is in project imports with Git LFS (open-uri follows redirects without UrlBlocker); triggering requires an authenticated user to run an import, and the SSRF is a server-side effect not observable by a browser.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/55439",
+        "https://about.gitlab.com/2018/12/31/security-release-gitlab-11-dot-6-dot-1-released/"
+      ]
+    },
+    "CVE-2018-20494": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD states only 'Incorrect Access Control' (CWE-863) with no endpoint or trigger detail, and the referenced GitLab sources give no CVE-specific description; browser reachability cannot be assessed, though access-control bugs typically require some authenticated context.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/12/31/security-release-gitlab-11-dot-6-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-20494"
+      ]
+    },
+    "CVE-2019-15576": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a reachable project/noteable containing private system notes to read"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Public sources describe this as unauthenticated information disclosure of private system notes via the GraphQL endpoint; /api/graphql is anonymously queryable cross-origin with ACAO:* so the JSON response is readable by a hostile page, but it requires a target project/resource that actually has private system notes.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://exploit-intel.com/vuln/CVE-2019-15576",
+        "https://ubuntu.com/security/CVE-2019-15576",
+        "https://hackerone.com/reports/633001"
+      ]
+    },
+    "CVE-2019-15575": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/search?scope=blobs (blobs scope)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a public project (known id) whose blobs search is reachable anonymously"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "CWE-77 command injection through the API blobs search scope, rated PR:N/UI:N; project-scoped blobs search on a public project is anonymously reachable via /api (CORS-readable), making it browser-triggerable conditioned on a reachable public project, though the HackerOne repro is not public.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2019-15575?format=md",
+        "https://cveawg.mitre.org/api/cve/CVE-2019-15575"
+      ]
+    },
+    "CVE-2019-18455": {
+      "status": "likely-compatible",
+      "confidence": "medium-high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/graphql",
+      "method": "POST application/json",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a deeply nested GraphQL query triggering the large/infinite loop"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "CWE-835 large/infinite loop in nested GraphQL query building with CVSS PR:N/UI:N; GraphQL queries are accepted anonymously at /api/graphql which is CORS-enabled under this model, so a hostile page can POST the nested query cross-origin (response not needed for DoS), though no public exact repro exists.",
+      "likelihood": "medium-high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://vulnerability.circl.lu/vuln/cve-2019-18455",
+        "https://about.gitlab.com/blog/2019/10/30/security-release-gitlab-12-dot-4-dot-1-released/"
+      ]
+    },
+    "CVE-2019-18460": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Elasticsearch integration enabled (EE)",
+        "an authenticated user performing comment search"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Incorrect access control in the Elasticsearch-backed Comments Search requires the EE Elasticsearch integration to be enabled and an authenticated user running a search; it is not reachable or readable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/blog/2019/10/30/security-release-gitlab-12-dot-4-dot-1-released/"
+      ]
+    },
+    "CVE-2019-15729": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project/merge_requests/:iid/pipeline_status",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Knowledge of namespace/project/MR iid",
+        "Target project with restricted pipeline visibility"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab issue 62073 shows the anon-accessible pipeline_status endpoint leaks pipeline info, but it is a non-/api controller route that sends no CORS headers; a hostile page can send the GET but cannot read the JSON response, so the disclosure is not achievable cross-origin.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/62073",
+        "https://about.gitlab.com/2019/08/29/security-release-gitlab-12-dot-2-dot-3-released/"
+      ]
+    },
+    "CVE-2019-15736": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated project access to create/run CI pipelines"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The DoS is 'under certain circumstances' via CI pipelines, which require authenticated project access to trigger (pushing/running pipelines); an anonymous hostile page cannot initiate pipelines.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/08/29/security-release-gitlab-12-dot-2-dot-3-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-15736"
+      ]
+    },
+    "CVE-2019-15730": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Jira integration configured (Maintainer/Admin)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The SSRF is in the Jira integration and requires an authenticated user with rights to configure that integration's URL; an anonymous cross-origin page cannot set it up, so it is outside the model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/08/29/security-release-gitlab-12-dot-2-dot-3-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/61349"
+      ]
+    },
+    "CVE-2019-15728": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "maintainer privilege to configure the Kubernetes integration"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The SSRF is in the Kubernetes integration, whose configuration requires maintainer-level access; it is not reachable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/08/29/security-release-gitlab-12-dot-2-dot-3-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/61314"
+      ]
+    },
+    "CVE-2019-15725": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/groups/:id/epics/:epic_id/notes",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "EE with epics",
+        "known group id and epic iid (enumerable)",
+        "epic promoted from a private project's issue carrying milestone/label data"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Issue 11431 shows an IDOR in the epic notes endpoint reached by unauthenticated GETs that leak notes (and milestone/label data from promoted private issues) by changing the epic iid; if served under /api/v4 the JSON is cross-origin readable, so it is browser-reachable given epic-iid enumeration and the seeded promoted-epic data.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ee/issues/11431"
+      ]
+    },
+    "CVE-2019-15722": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "attacker seeds malicious markdown content (requires authenticated write)",
+        "a victim views that content in their browser"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The resource exhaustion is client-side (it exhausts the browser of whoever renders the markdown), not a server-side trigger against the internal GitLab; it requires seeded content and a victim viewing it, so it does not fit the anonymous hostile-page-to-internal-GitLab model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/61410",
+        "https://about.gitlab.com/2019/08/29/security-release-gitlab-12-dot-2-dot-3-released/"
+      ]
+    },
+    "CVE-2019-6960": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/wikis",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "external wiki service enabled on the target project",
+        "project anonymously readable (public) with a known id",
+        "internal wiki content that should have been hidden"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The underlying report shows the internal wiki stays reachable (web, git, and /api/v4/projects/:id/wikis) when an external wiki is enabled; the API route is CORS-readable anonymously, but a cross-origin leak only matters where the project is reachable anonymously yet the wiki should be concealed.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/54357",
+        "https://about.gitlab.com/2019/01/31/security-release-gitlab-11-dot-7-dot-3-released/"
+      ]
+    },
+    "CVE-2019-6793": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": "form POST / GET supplying a URL",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "form submit",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an anonymous Jira-integration trigger endpoint that accepts an attacker-supplied URL and is cross-origin sendable (exact repro not public)",
+        "high attack complexity (AC:H), e.g. DNS-rebinding-style setup"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab describes this as an unauthenticated blind SSRF in the Jira integration; blind SSRF needs no readable response, so if the trigger is a tokenless endpoint taking an attacker URL it could be browser-driven, but the exact anonymous entry point is not public and CVSS AC:H indicates non-trivial conditions, making it conditional at best.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/50748",
+        "https://about.gitlab.com/2019/01/31/security-release-gitlab-11-dot-7-dot-3-released/"
+      ]
+    },
+    "CVE-2019-6788": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "OAuth covert-redirect (GitHub/Bitbucket integration)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "GitHub or Bitbucket OAuth integration configured",
+        "A logged-in victim who performs/authorizes the OAuth flow via a covert redirect"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Obtaining the user's OAuth token requires a configured GitHub/Bitbucket integration and victim interaction in the OAuth flow (covert redirect); it is not an anonymous request a hostile page can complete on its own.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/56663",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-6788"
+      ]
+    },
+    "CVE-2019-6782": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "user profile / contributed-projects endpoint (route not confirmed; readable only if under /api)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "a known target username/user id",
+        "the leak is exposed via an /api route whose response is CORS-readable (if it is only on the HTML profile page it is not cross-origin readable and this falls outside the model)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "An unauthenticated (PR:N) authorization issue exposes a private profile's contributed-project information; it is only exfiltratable by a hostile page if served by a CORS-readable /api route against a known user, which the unavailable primary sources do not confirm.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/01/31/security-release-gitlab-11-dot-7-dot-3-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-6782"
+      ]
+    },
+    "CVE-2019-11605": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/*",
+      "method": "GET",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a valid read_user-scoped personal access token"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The CVE description states the disclosure occurs 'when using a read_user scoped token', i.e. it requires a valid credential the anonymous hostile-page model excludes.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/04/30/security-release-gitlab-11-dot-10-dot-3-released/"
+      ]
+    },
+    "CVE-2019-14943": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "n/a",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "local/network access to the service protected by the hard-coded credential"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "This is a hard-coded-credentials (omnibus) configuration weakness, not an HTTP endpoint a hostile web page can send a request to; no browser-reachable trigger exists.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4530",
+        "https://about.gitlab.com/2019/08/12/critical-security-release-gitlab-12-dot-1-dot-6-released/"
+      ]
+    },
+    "CVE-2018-19581": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an authenticated Guest user account"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The IDOR lets a Guest user set the weight of an issue they create; it explicitly requires an authenticated Guest, so it is outside the anonymous model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/11/28/security-release-gitlab-11-dot-5-dot-1-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ee/issues/7696"
+      ]
+    },
+    "CVE-2019-9732": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Only a generic 'Incorrect Access Control' description is available; the linked GitLab 11.8.2 release blog returns HTTP 404 and NVD references are generic category pages, so no primary source establishes the route, method or whether an anonymous cross-origin request can reach it.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/03/14/gitlab-11-8-2-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-9732"
+      ]
+    },
+    "CVE-2019-9485": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Sources describe only 'Insecure Permissions' with no endpoint, method, or auth detail; the individual GitLab 11.8.1 advisory is no longer retrievable and NVD/aggregators give no specifics, so an anonymous browser trigger cannot be established either way.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://security-tracker.debian.org/tracker/CVE-2019-9485",
+        "https://vulnerability.circl.lu/vuln/CVE-2019-9485"
+      ]
+    },
+    "CVE-2019-9218": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Only the generic GitLab releases blog is referenced and NVD gives no detail beyond 'Incorrect Access Control (issue 1 of 5)'; the affected route, auth requirement and trigger cannot be established from primary sources.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/blog/categories/releases/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-9218"
+      ]
+    },
+    "CVE-2019-7353": {
+      "status": "outside-threat-model",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user with access to one project viewing confidential titles of other projects"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The Releases authorization bug leaked confidential issue/MR titles 'of other projects' to users, which indicates a logged-in viewer rather than an anonymous one; the primary advisory was not fetchable and no anonymous cross-origin-readable trigger is established.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/56568",
+        "https://about.gitlab.com/2019/02/05/critical-security-release-gitlab-11-dot-7-dot-4-released/"
+      ]
+    },
+    "CVE-2019-6797": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "maintainer",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated project maintainer viewing the CI/CD external-repo UI"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The GitHub token was leaked to project maintainers in the UI, so disclosure requires an authenticated maintainer-role user viewing a project page; not reachable by an anonymous cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/01/31/security-release-gitlab-11-dot-7-dot-3-released/"
+      ]
+    },
+    "CVE-2019-6781": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated attacker sets a malicious profile name",
+        "notification emails are generated and a victim clicks the injected link"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The open-redirect/link-injection requires an authenticated user to set a crafted profile name and relies on email delivery plus a victim clicking the link; none of this can be driven by an anonymous cross-origin web page against internal GitLab.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/22076",
+        "https://about.gitlab.com/2019/01/31/security-release-gitlab-11-dot-7-dot-3-released/"
+      ]
+    },
+    "CVE-2019-5883": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an authenticated GitLab user account"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The issue-comment access-control flaw lets a logged-in user comment on an issue they should not; it inherently requires authentication, so it is outside the anonymous-page model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/11/28/security-release-gitlab-11-dot-5-dot-1-released/"
+      ]
+    },
+    "CVE-2018-20500": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "CI/CD settings (runner registration token)",
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Prior knowledge of the runner registration token by a former maintainer"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The issue is that the runner registration token could not be reset, a design/permissions weakness exploitable only by someone who already knew the token; there is no remote request a hostile page triggers.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/12/31/security-release-gitlab-11-dot-6-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-20500"
+      ]
+    },
+    "CVE-2018-19585": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user configuring project mirroring over the Git protocol (non-HTTP transport)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "CRLF injection in project mirroring occurs over the Git protocol and requires an authenticated user to configure mirroring; it is a non-HTTP transport not reachable by a cross-origin browser request (the packetstorm RCE is a credentialed chain).",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/11/28/security-release-gitlab-11-dot-5-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-19585"
+      ]
+    },
+    "CVE-2019-10112": {
+      "status": "outside-threat-model",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "An insecurely derived HMAC key is a server-side cryptographic weakness exploited by forging/validating signed values rather than by a direct anonymous cross-origin HTTP request; no browser-sendable trigger is indicated by the advisory.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/04/01/security-release-gitlab-11-dot-9-dot-4-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ee/issues/9730"
+      ]
+    },
+    "CVE-2019-10114": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/oauth/* (OAuth authorization flow)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "the OAuth authentication flow being exercised"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The CWE-203 information exposure occurs during OAuth parameter validation; OAuth endpoints are non-/api (no CORS, responses not readable) and the disclosure depends on the authentication flow, so a hostile page cannot read the exposed data cross-origin.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/04/01/security-release-gitlab-11-dot-9-dot-4-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ee/issues/9729"
+      ]
+    },
+    "CVE-2019-10113": {
+      "status": "conditional-compatible",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/<id>/languages",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a known/public project id whose languages endpoint is anonymously reachable",
+        "many concurrent requests to exhaust resources"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Issue 54977 describes uncontrolled resource consumption from concurrent GET /api/v4/projects/<id>/languages; this is a simple cross-origin GET to a CORS-enabled API route that a hostile page can fire in high volume, conditional on a reachable (public) project id and sufficient concurrency.",
+      "likelihood": "medium",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/54977"
+      ]
+    },
+    "CVE-2019-10640": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated write access to a project to supply a crafted .gitlab-ci.yml refs value"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The ReDoS is triggered via the refs value in .gitlab-ci.yml, which requires an authenticated user with write access to the CI configuration; it is not reachable by an anonymous cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/49665",
+        "https://about.gitlab.com/2019/04/01/security-release-gitlab-11-dot-9-dot-4-released/"
+      ]
+    },
+    "CVE-2019-9890": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD gives only 'Insecure Permissions' with no detail and the linked GitLab 11.8.1 advisory now redirects to a landing page, so no route, method, or authentication facts are available to assess this against the model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/03/04/security-release-gitlab-11-dot-8-dot-1-released/",
+        "https://jamesbrine.com.au/cve-2019-9890-information/"
+      ]
+    },
+    "CVE-2019-9756": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab issue 54243 is inaccessible and mirrors give no endpoint/auth detail; the CWE-639 (authorization-bypass-through-user-controlled-key) class normally requires the attacker's own authenticated session to swap an id, which a cross-origin hostile page cannot supply, but evidence is insufficient to confirm the route or whether any anonymous trigger exists.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://vulnerability.circl.lu/vuln/cve-2019-9756",
+        "https://www.opencve.io/cve/CVE-2019-9756"
+      ]
+    },
+    "CVE-2019-9223": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project.git/info/refs (git clone over HTTP)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Candidate private project path to probe"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab issue 50334 shows the flaw is a private-repo existence oracle via differing git-clone responses; the git HTTP endpoint is not /api and sends no CORS headers, so a hostile page cannot read the distinguishing status/body cross-origin.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/50334",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-9223"
+      ]
+    },
+    "CVE-2019-9220": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "NVD gives only 'Uncontrolled Resource Consumption' (CWE-400) with no endpoint, method or auth detail, and the referenced GitLab sources carry no CVE-specific description; browser reachability cannot be established.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/03/04/security-release-gitlab-11-dot-8-dot-1-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2019-9220"
+      ]
+    },
+    "CVE-2019-9217": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a victim actively viewing the GitLab UI and being deceived by the misrepresented information"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "A UI misrepresentation of critical information is a client-side deception that requires the victim to be using the GitLab interface; a hostile page cannot supply that interaction or trigger it as a network request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/03/04/security-release-gitlab-11-dot-8-dot-1-released/"
+      ]
+    },
+    "CVE-2019-9174": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:project/services/prometheus/edit",
+      "method": "form POST",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Project Maintainer able to edit the Prometheus integration settings",
+        "Attacker-controlled DNS record for TOCTOU rebinding"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Blind SSRF in the Prometheus integration requires an authenticated maintainer to set the service URL plus a server-side DNS-rebinding (TOCTOU) step; not reachable by an anonymous hostile page.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/55468"
+      ]
+    },
+    "CVE-2018-20229": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The primary advisory redirects to a generic index and mirrors give no vulnerable endpoint or method for this directory traversal; although CVSS lists PR:N, the response of a file-read traversal on a non-/api route would not be cross-origin readable, and the evidence is insufficient to confirm any anonymous browser-sendable trigger.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://ubuntu.com/security/CVE-2018-20229?format=md",
+        "https://vulnerability.circl.lu/vuln/cve-2018-20229"
+      ]
+    },
+    "CVE-2018-20144": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated ability to use project import by URL (with Git LFS)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The underlying report shows arbitrary file read via the 'project import by URL' + Git LFS feature, which requires an authenticated user who can import a project; not anonymously browser-reachable.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/12/13/critical-security-release-gitlab-11-dot-5-dot-4-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/55200"
+      ]
+    },
+    "CVE-2018-19856": {
+      "status": "confirmed-compatible",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/templates/gitignores/{name}",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Public PoC (H1 454777 / issue 54857) shows an anonymous curl GET https://gitlab.com/api/v4/templates/gitignores/%2e%2e%2fPython%2ea reading traversed files; this is an unauthenticated simple GET to a CORS-enabled API route, so a hostile page can send it and read the response cross-origin.",
+      "likelihood": "high",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/54857",
+        "https://about.gitlab.com/2018/12/06/critical-security-release-gitlab-11-dot-5-dot-3-released/"
+      ]
+    },
+    "CVE-2019-6240": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "an authenticated user performing a GitLab project import"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Rapid7's advisory frames this directory traversal as an arbitrary repo read in GitLab project import; project import requires an authenticated user, and the result is not returned to a cross-origin page, so it is outside the anonymous hostile-page model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2019/01/16/critical-security-release-gitlab-11-dot-6-dot-4-released/",
+        "https://vulnerability.circl.lu/vuln/cve-2019-6240"
+      ]
+    },
+    "CVE-2018-18843": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Maintainer/admin rights to configure the Kubernetes integration"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "SSRF in the Kubernetes integration is a server-side request triggered only after an authenticated user with project configuration rights sets the integration URL; a hostile anonymous page cannot configure the integration nor read the server-side response.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/11/01/critical-security-release-gitlab-11-dot-4-dot-4-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-18843"
+      ]
+    },
+    "CVE-2018-18648": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project/merge_requests/:iid/test_reports.json",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "CORS fetch",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "A JUnit test report that fails to parse must first be uploaded via CI (requires authenticated pipeline access)",
+        "Target MR path known"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "GitLab issue 50975 shows a Ruby stack trace is returned in the test_reports.json response, but that route is a non-/api controller path sending no CORS headers (response not readable cross-origin) and the trigger requires a malformed JUnit artifact seeded via an authenticated pipeline.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/50975",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-18648"
+      ]
+    },
+    "CVE-2018-18641": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "n/a",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "access to server-side stored data (logs/disk)"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Cleartext storage of sensitive information (CWE-312) is a server-side data-at-rest issue; it is not triggered or disclosed via a cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/51113",
+        "https://about.gitlab.com/2018/10/29/security-release-gitlab-11-dot-4-dot-3-released/"
+      ]
+    },
+    "CVE-2018-17939": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "merge request web .json endpoint (non-/api)",
+      "method": "GET",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "the leaking merge request .json route is a non-/api web route that is not CORS-readable cross-origin"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Information exposure via the merge request JSON endpoint is on the web-UI merge_requests/:id.json route, which sends no CORS headers and so is not readable cross-origin; a hostile anonymous page cannot exfiltrate the leaked data even if it could send the request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/10/05/critical-security-release-11-3-4/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-17939"
+      ]
+    },
+    "CVE-2018-18649": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/api/v4/projects/:id/wikis",
+      "method": "POST application/json",
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": true,
+      "impact": "unknown",
+      "prerequisites": [
+        "a valid API token / authenticated session with write access to a wiki"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "RCE is in the wiki API, which requires an authenticated API token with wiki write access; an anonymous hostile page has no credentials to reach it.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/53072",
+        "https://about.gitlab.com/2018/10/29/security-release-gitlab-11-dot-4-dot-3-released/"
+      ]
+    },
+    "CVE-2018-16049": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "admin",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Access to server-side Sidekiq logs"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Sensitive data is disclosed in server-side Sidekiq logs via an error message; reading it requires log/server access, not any HTTP request a browser can make.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/46967",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-16049"
+      ]
+    },
+    "CVE-2018-14602": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/-/metrics (Prometheus metrics)",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Prometheus metrics endpoint enabled and not IP-restricted"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The disclosure of private project pathnames is via the Prometheus metrics endpoint, which is a non-/api text route carrying no CORS headers, so a hostile page cannot read its response cross-origin; the metrics endpoint is also normally IP-allowlisted. The whole value of the bug (reading the data) is unavailable in this model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/07/26/security-release-gitlab-11-dot-1-dot-2-released/",
+        "https://gitlab.com/gitlab-com/infrastructure/issues/4423"
+      ]
+    },
+    "CVE-2018-14601": {
+      "status": "conditional-compatible",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/<ns>/<project>/blob/:ref/:file?format=json&viewer=rich",
+      "method": "GET",
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "img",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a crafted heavy-Markdown file seeded in a reachable (public) project/blob"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Issue 49409 shows slow Markdown rendering triggered by requesting a blob with ?format=json&viewer=rich; a cross-origin GET to such a blob on a public project fires the server-side render (DoS needs no readable response), conditioned on the crafted Markdown already existing on the instance.",
+      "likelihood": "conditional",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/07/26/security-release-gitlab-11-dot-1-dot-2-released/",
+        "https://gitlab.com/gitlab-org/gitlab-ce/issues/49409"
+      ]
+    },
+    "CVE-2018-14364": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user with rights to import a crafted project archive"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "Directory traversal with write access (resultant RCE) is triggered through the authenticated GitLab project import component, which an anonymous hostile page cannot invoke.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/07/17/critical-security-release-gitlab-11-dot-0-dot-4-released/",
+        "https://nvd.nist.gov/vuln/detail/CVE-2018-14364"
+      ]
+    },
+    "CVE-2017-0921": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": true,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "a compromised victim session"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The CVE description and the CVSS AC:H vector state the unverified password change is only exploitable 'if a victim's session is compromised', so it falls outside the no-stolen-token, anonymous hostile-page model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/05/29/security-release-gitlab-10-dot-8-dot-2-released/"
+      ]
+    },
+    "CVE-2017-0919": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user invoking the GitLab import component"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The authorization bypass lets a user perform operations in a group via the import component; it requires an authenticated user driving the import flow, not an anonymous cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://hackerone.com/reports/301137"
+      ]
+    },
+    "CVE-2018-8971": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "none",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "Auth0 OmniAuth integration configured on the instance"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "An omniauth-auth0 misconfiguration that signs in unintended users is an authentication flaw benefiting the attacker's own login and requires the Auth0 integration to be configured; it is not an anonymous cross-origin request reaching an internal GitLab from a victim's browser.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/03/20/critical-security-release-gitlab-10-dot-5-dot-6-released/"
+      ]
+    },
+    "CVE-2017-0922": {
+      "status": "outside-threat-model",
+      "confidence": "medium",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "/:namespace/:project/boards/:id (web controller)",
+      "method": "GET",
+      "authentication": "none (account)",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "The IDOR/authorization-bypass disclosure is in Projects::BoardsController, a non-/api web controller whose HTML/JSON response carries no CORS headers; a hostile page can send the GET but cannot read the disclosed board data cross-origin, so no information is actually exfiltrated under this model.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/01/16/gitlab-10-dot-3-dot-4-released/",
+        "https://nvd.nist.gov/vuln/detail/cve-2017-0922"
+      ]
+    },
+    "CVE-2017-0916": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "admin",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "admin access to configure system hooks"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "RCE is through the system_hook_push queue / system web hooks, an administrator-only feature, so it is not reachable by an unauthenticated cross-origin request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/01/16/gitlab-10-dot-3-dot-4-released/",
+        "https://www.debian.org/security/2018/dsa-4145"
+      ]
+    },
+    "CVE-2017-0915": {
+      "status": "outside-threat-model",
+      "confidence": "high",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": null,
+      "method": null,
+      "authentication": "required",
+      "userInteraction": false,
+      "browserMechanism": "none",
+      "responseReadable": false,
+      "impact": "unknown",
+      "prerequisites": [
+        "authenticated user able to invoke the GitLab project import service"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "RCE via lack of input validation in GitlabProjectsImportService requires an authenticated user to invoke the import flow; it is not reachable as an anonymous cross-origin browser request.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://about.gitlab.com/2018/01/16/gitlab-10-dot-3-dot-4-released/",
+        "https://hackerone.com/reports/298873"
+      ]
+    },
+    "CVE-2017-0914": {
+      "status": "unresolved",
+      "confidence": "low",
+      "reviewDepth": "parallel-agent-primary-source-review",
+      "route": "milestone listing/search (MilestoneFinder)",
+      "method": "GET",
+      "authentication": "unknown",
+      "userInteraction": false,
+      "browserMechanism": "unknown",
+      "responseReadable": "unknown",
+      "impact": "unknown",
+      "prerequisites": [
+        "SQLi-vulnerable milestone parameter reachable anonymously (e.g. via a public project or /api milestones)",
+        "A readable /api response or a blind (time-based) extraction path for data exfiltration"
+      ],
+      "publicPoc": "see evidenceUrls",
+      "rationale": "SQL injection in MilestoneFinder; the primary HackerOne report (#298176) is permission-restricted and the 10.3.4 advisory is no longer retrievable, and NVD gives conflicting auth signals, so whether the vulnerable finder is reachable and readable by an anonymous cross-origin request cannot be established.",
+      "likelihood": "n/a",
+      "reviewMode": "parallel-agent-review",
+      "manuallyReviewed": false,
+      "reviewedAt": "2026-11-04T07:25:48.858600Z",
+      "evidenceUrls": [
+        "https://nvd.nist.gov/vuln/detail/cve-2017-0914",
+        "https://hackerone.com/reports/298176"
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+state/
+results/
+
+corpus-manifests/
+dist/
+
+.DS_Store
+*.bak
+.claude/
+node_modules/
