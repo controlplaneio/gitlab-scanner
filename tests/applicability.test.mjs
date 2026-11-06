@@ -6,9 +6,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const html = fs.readFileSync(new URL('../poc/index.html', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL('../docs/index.html', import.meta.url), 'utf8');
 const source = html.match(/\/\/ @applicability-begin[^\n]*\n([\s\S]*?)\/\/ @applicability-end/)?.[1];
-assert.ok(source, 'applicability markers not found in poc/index.html');
+assert.ok(source, 'applicability markers not found in docs/index.html');
 const ctx = { catalogVersions: [], catalogEdition: null };
 vm.createContext(ctx);
 vm.runInContext(`${source}\nthis.api = { cpeEdition, applicabilityMatches, vulnStatusFor };`, ctx);
@@ -98,7 +98,7 @@ test('exact-version CPEs match only that version and edition', () => {
 });
 
 test('real catalogue: every errata record keeps its NVD original and a cited reason', () => {
-  const catalog = JSON.parse(fs.readFileSync(new URL('../poc/cves/gitlab-10.0.0-and-later.json', import.meta.url), 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(new URL('../docs/cves/gitlab-10.0.0-and-later.json', import.meta.url), 'utf8'));
   const fixed = catalog.vulnerabilities.filter((item) => item.errata);
   assert.ok(fixed.length >= 9);
   for (const item of fixed) {
@@ -116,7 +116,7 @@ test('real catalogue: every errata record keeps its NVD original and a cited rea
 });
 
 test('real catalogue: EE-only records surface on EE builds and stay off CE builds', () => {
-  const catalog = JSON.parse(fs.readFileSync(new URL('../poc/cves/gitlab-10.0.0-and-later.json', import.meta.url), 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(new URL('../docs/cves/gitlab-10.0.0-and-later.json', import.meta.url), 'utf8'));
   const eeOnly = catalog.vulnerabilities.filter((item) => {
     const eds = new Set((item.applicability || []).map((e) => cpeEdition(e.criteria)));
     return eds.size === 1 && eds.has('enterprise');
