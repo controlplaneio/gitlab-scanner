@@ -3,9 +3,12 @@
 A single web page that, when a victim opens it in their browser, fingerprints an
 internal GitLab they can reach, tells you which CVEs that version is exposed to,
 and flags which of those might be reached from the attacker's page itself with no
-GitLab login. It is a drive-by: the victim has to open the page (and, on recent
-Chrome against an internal address, accept a local-network permission prompt). It is
-open source, it deliberately never phones home, and everything it needs ships in
+GitLab login. 
+
+It is a drive-by: the victim has to open the page (and, on recent
+Chrome against an internal address, accept a local-network permission prompt). 
+
+This project is open source, it deliberately never phones home, and everything it needs ships in
 the page.
 
 ## Why this matters
@@ -287,3 +290,8 @@ tool, or for any decision taken on the basis of its output.
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
+
+## Credit
+
+- Research, Designed and Built by [@chrisns](https://github.com/chrisns)
+- Published by [ControlPlane](https://control-plane.io)
